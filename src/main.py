@@ -1,18 +1,15 @@
 """
-NakshatraAlpha
-Financial Astrology Research Platform
-
-Author : Sudhir Sharma
-Version : 0.1.0
+Entry point for NakshatraAlpha
 """
+
+from app import Application
 
 
 def main():
-    print("=" * 50)
-    print("        NakshatraAlpha")
-    print("Financial Astrology Research Platform")
-    print("Version 0.1.0")
-    print("=" * 50)
+
+    application = Application()
+
+    application.start()
 
 
 if __name__ == "__main__":
