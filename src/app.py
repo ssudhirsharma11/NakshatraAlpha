@@ -6,6 +6,7 @@ Responsible for starting NakshatraAlpha.
 
 from core.config import Configuration
 from core.logger import get_logger
+from services.astronomy_service import AstronomyService
 
 
 class Application:
@@ -20,6 +21,9 @@ class Application:
         self.logger.info("=" * 55)
 
         config = Configuration()
+        astronomy = AstronomyService()
+        astronomy.initialize()
+        self.logger.info(astronomy.status())
 
         self.logger.info(
             f"Application Version : {config.version}"
