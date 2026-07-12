@@ -36,16 +36,60 @@ class AstronomyService:
             raise RuntimeError("Astronomy Service not initialized.")
 
         ephemeris = EphemerisService()
-        sun_longitude = ephemeris.current_sun_longitude()
 
         return [
-            PlanetPosition(Planet.SUN, sun_longitude, 0.0, 0.98),
-            PlanetPosition(Planet.MOON, 220.1, 5.2, 13.2),
-            PlanetPosition(Planet.MERCURY, 150.4, 1.0, 1.1),
-            PlanetPosition(Planet.VENUS, 45.3, 0.5, 1.2),
-            PlanetPosition(Planet.MARS, 300.7, -1.2, 0.5),
-            PlanetPosition(Planet.JUPITER, 20.8, -0.1, 0.08),
-            PlanetPosition(Planet.SATURN, 330.2, 0.3, 0.03),
-            PlanetPosition(Planet.RAHU, 180.0, 0.0, -0.05),
-            PlanetPosition(Planet.KETU, 0.0, 0.0, -0.05),
+            PlanetPosition(
+                Planet.SUN,
+                ephemeris.current_longitude(Planet.SUN),
+                0.0,
+                0.98,
+            ),
+            PlanetPosition(
+                Planet.MOON,
+                ephemeris.current_longitude(Planet.MOON),
+                5.2,
+                13.2,
+            ),
+            PlanetPosition(
+                Planet.MERCURY,
+                ephemeris.current_longitude(Planet.MERCURY),
+                1.0,
+                1.1,
+            ),
+            PlanetPosition(
+                Planet.VENUS,
+                ephemeris.current_longitude(Planet.VENUS),
+                0.5,
+                1.2,
+            ),
+            PlanetPosition(
+                Planet.MARS,
+                ephemeris.current_longitude(Planet.MARS),
+                -1.2,
+                0.5,
+            ),
+            PlanetPosition(
+                Planet.JUPITER,
+                ephemeris.current_longitude(Planet.JUPITER),
+                -0.1,
+                0.08,
+            ),
+            PlanetPosition(
+                Planet.SATURN,
+                ephemeris.current_longitude(Planet.SATURN),
+                0.3,
+                0.03,
+            ),
+            PlanetPosition(
+                Planet.RAHU,
+                ephemeris.current_longitude(Planet.RAHU),
+                0.0,
+                -0.05,
+            ),
+            PlanetPosition(
+                Planet.KETU,
+                ephemeris.current_longitude(Planet.KETU),
+                0.0,
+                -0.05,
+            ),
         ]
