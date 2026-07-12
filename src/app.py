@@ -22,8 +22,15 @@ class Application:
 
         config = Configuration()
         astronomy = AstronomyService()
+
         astronomy.initialize()
+        astronomy.load_ephemeris()
+
         self.logger.info(astronomy.status())
+
+        positions = astronomy.get_planet_positions()
+
+        self.logger.info(f"Loaded {len(positions)} planetary objects.")
 
         self.logger.info(
             f"Application Version : {config.version}"
