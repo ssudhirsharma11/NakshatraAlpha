@@ -11,7 +11,7 @@ import swisseph as swe
 class EphemerisService:
 
     def __init__(self):
-        # Tell Swiss Ephemeris where future data files will live
+        # Path for ephemeris files (we'll download them later)
         swe.set_ephe_path("data/ephemeris")
 
     def current_sun_longitude(self):
@@ -27,6 +27,4 @@ class EphemerisService:
 
         result, _ = swe.calc_ut(julian_day, swe.SUN)
 
-        longitude = result[0]
-
-        return longitude
+        return result[0]
