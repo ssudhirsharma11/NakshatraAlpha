@@ -7,6 +7,7 @@ Responsible for starting NakshatraAlpha.
 from core.config import Configuration
 from core.logger import get_logger
 from services.astronomy_service import AstronomyService
+from astrology.zodiac import Zodiac
 
 
 class Application:
@@ -30,11 +31,18 @@ class Application:
 
         positions = astronomy.get_planet_positions()
 
-        self.logger.info(f"Loaded {len(positions)} planetary objects.")
+        self.logger.info(
+            f"Loaded {len(positions)} planetary objects."
+        )
 
         for planet in positions:
+
+            sign = Zodiac.sign(planet.longitude)
+
             self.logger.info(
-                f"{planet.planet.value:8} {planet.longitude:7.2f}°"
+                f"{planet.planet.value:8} "
+                f"{planet.longitude:7.2f}°   "
+                f"{sign}"
             )
 
         self.logger.info(
