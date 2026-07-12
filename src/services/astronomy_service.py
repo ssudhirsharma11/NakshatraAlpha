@@ -4,6 +4,9 @@ Astronomy Service
 Responsible for astronomical calculations.
 """
 
+from models.planet import Planet
+from models.planet_position import PlanetPosition
+
 
 class AstronomyService:
 
@@ -19,30 +22,26 @@ class AstronomyService:
         """Load astronomical ephemeris."""
         self.ephemeris_loaded = True
 
-    def get_planet_positions(self):
-        """Placeholder for planetary positions."""
-
-        if not self.initialized:
-            raise RuntimeError("Astronomy Service not initialized")
-
-        if not self.ephemeris_loaded:
-            raise RuntimeError("Ephemeris not loaded")
-
-        return {
-            "Sun": None,
-            "Moon": None,
-            "Mercury": None,
-            "Venus": None,
-            "Mars": None,
-            "Jupiter": None,
-            "Saturn": None,
-            "Rahu": None,
-            "Ketu": None,
-        }
-
     def status(self):
 
-        if self.initialized and self.ephemeris_loaded:
-            return "Astronomy Service Ready"
+        if self.initialized:
+            return "√ Astronomy Service Ready"
 
-        return "Astronomy Service Not Ready"
+        return "X Astronomy Service Not Initialized"
+
+    def get_planet_positions(self):
+
+        if not self.initialized:
+            raise RuntimeError("Astronomy Service not initialized.")
+
+        return [
+            PlanetPosition(Planet.SUN, 100.5, 0.0, 0.98),
+            PlanetPosition(Planet.MOON, 220.1, 5.2, 13.2),
+            PlanetPosition(Planet.MERCURY, 150.4, 1.0, 1.1),
+            PlanetPosition(Planet.VENUS, 45.3, 0.5, 1.2),
+            PlanetPosition(Planet.MARS, 300.7, -1.2, 0.5),
+            PlanetPosition(Planet.JUPITER, 20.8, -0.1, 0.08),
+            PlanetPosition(Planet.SATURN, 330.2, 0.3, 0.03),
+            PlanetPosition(Planet.RAHU, 180.0, 0.0, -0.05),
+            PlanetPosition(Planet.KETU, 0.0, 0.0, -0.05),
+        ]

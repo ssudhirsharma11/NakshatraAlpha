@@ -32,6 +32,11 @@ class Application:
 
         self.logger.info(f"Loaded {len(positions)} planetary objects.")
 
+        for planet in positions:
+            self.logger.info(
+                f"{planet.planet.value:8} {planet.longitude:7.2f}°"
+            )
+
         self.logger.info(
             f"Application Version : {config.version}"
         )
