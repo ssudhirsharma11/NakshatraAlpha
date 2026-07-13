@@ -11,6 +11,7 @@ from services.astronomy_service import AstronomyService
 
 from astrology.zodiac import Zodiac
 from astrology.nakshatra import Nakshatra
+from astrology.tithi import Tithi
 
 
 class Application:
@@ -25,7 +26,6 @@ class Application:
         self.logger.info("=" * 55)
 
         config = Configuration()
-
         astronomy = AstronomyService()
 
         astronomy.initialize()
@@ -35,14 +35,35 @@ class Application:
 
         positions = astronomy.get_planet_positions()
 
-        self.logger.info(
-            f"Loaded {len(positions)} planetary objects."
+        self.logger.info(f"Loaded {len(positions)} planetary objects.")
+        self.logger.info("")
+
+        # -------------------------------------------------------
+        # Calculate Current Tithi
+        # -------------------------------------------------------
+
+        sun = next(p for p in positions if p.planet.value == "Sun")
+        moon = next(p for p in positions if p.planet.value == "Moon")
+
+        tithi = Tithi.calculate(
+            sun.longitude,
+            moon.longitude,
         )
+
+        self.logger.info("Current Panchang")
+        self.logger.info("-" * 40)
+        self.logger.info(f"Paksha      : {tithi.paksha}")
+        self.logger.info(f"Tithi       : {tithi.name}")
+        self.logger.info(f"Tithi Group : {tithi.group}")
+        self.logger.info(f"Tithi Lord  : {tithi.lord}")
+
+        self.logger.info("")
+        self.logger.info("Planetary Positions")
+        self.logger.info("-" * 40)
 
         for planet in positions:
 
             sign = Zodiac.sign(planet.longitude)
-
             nakshatra = Nakshatra.get(
                 planet.longitude
             )
@@ -50,10 +71,11 @@ class Application:
             self.logger.info(
                 f"{planet.planet.value:8} "
                 f"{planet.longitude:7.2f}°   "
-                f"{sign:10} "
+                f"{sign:8} "
                 f"{nakshatra}"
             )
 
+        self.logger.info("")
         self.logger.info(
             f"Application Version : {config.version}"
         )
