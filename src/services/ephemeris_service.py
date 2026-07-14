@@ -1,5 +1,7 @@
 """
 Swiss Ephemeris Service
+
+Responsible for all astronomical calculations.
 """
 
 from datetime import datetime
@@ -14,7 +16,7 @@ class EphemerisService:
     def __init__(self):
         swe.set_ephe_path("data")
 
-    def _julian_day(self):
+    def julian_day(self):
 
         now = datetime.utcnow()
 
@@ -27,7 +29,7 @@ class EphemerisService:
 
     def current_longitude(self, planet: Planet):
 
-        jd = self._julian_day()
+        jd = self.julian_day()
 
         planet_map = {
             Planet.SUN: swe.SUN,
@@ -48,7 +50,14 @@ class EphemerisService:
 
         longitude = result[0]
 
+        # Ketu is always opposite Rahu
         if planet == Planet.KETU:
             longitude = (longitude + 180.0) % 360.0
 
         return longitude
+
+    def current_sun_longitude(self):
+        return self.current_longitude(Planet.SUN)
+
+    def current_moon_longitude(self):
+        return self.current_longitude(Planet.MOON)

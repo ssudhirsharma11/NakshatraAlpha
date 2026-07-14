@@ -1,20 +1,24 @@
 """
 Tithi Calculation
+
+Calculates live Tithi from Sun and Moon longitudes.
 """
 
 from dataclasses import dataclass
 
+from services.ephemeris_service import EphemerisService
+
 
 @dataclass
-class TithiInfo:
+class Tithi:
+
     name: str
-    number: int
     paksha: str
     group: str
     lord: str
 
 
-class Tithi:
+class TithiCalculator:
 
     TITHI_NAMES = [
         "Pratipada",
@@ -32,59 +36,75 @@ class Tithi:
         "Trayodashi",
         "Chaturdashi",
         "Purnima",
+        "Pratipada",
+        "Dwitiya",
+        "Tritiya",
+        "Chaturthi",
+        "Panchami",
+        "Shashthi",
+        "Saptami",
+        "Ashtami",
+        "Navami",
+        "Dashami",
+        "Ekadashi",
+        "Dwadashi",
+        "Trayodashi",
+        "Chaturdashi",
+        "Amavasya",
     ]
 
-    GROUPS = {
-        1: ("Nanda", "Venus"),
-        2: ("Bhadra", "Mercury"),
-        3: ("Jaya", "Mars"),
-        4: ("Rikta", "Saturn"),
-        5: ("Poorna", "Jupiter"),
-        6: ("Nanda", "Venus"),
-        7: ("Bhadra", "Mercury"),
-        8: ("Jaya", "Mars"),
-        9: ("Rikta", "Saturn"),
-        10: ("Poorna", "Jupiter"),
-        11: ("Nanda", "Venus"),
-        12: ("Bhadra", "Mercury"),
-        13: ("Jaya", "Mars"),
-        14: ("Rikta", "Saturn"),
-        15: ("Poorna", "Jupiter"),
+    GROUPS = [
+        "Nanda",
+        "Bhadra",
+        "Jaya",
+        "Rikta",
+        "Poorna",
+    ]
+
+    LORDS = {
+        "Nanda": "Venus",
+        "Bhadra": "Mercury",
+        "Jaya": "Mars",
+        "Rikta": "Saturn",
+        "Poorna": "Jupiter",
     }
 
-    @staticmethod
-    def calculate(sun_longitude: float, moon_longitude: float):
+    def get(self):
 
-        difference = (moon_longitude - sun_longitude) % 360
+        ephemeris = EphemerisService()
 
-        tithi_number = int(difference / 12) + 1
+        sun = ephemeris.current_sun_longitude()
+        moon = ephemeris.current_moon_longitude()
+
+        difference = moon - sun
+
+        if difference < 0:
+            difference += 360.0
+
+        # 1 to 30
+        tithi_number = int(difference / 12.0) + 1
+
+        if tithi_number > 30:
+            tithi_number = 30
+
+        name = self.TITHI_NAMES[tithi_number - 1]
 
         if tithi_number <= 15:
             paksha = "Shukla"
-            name = Tithi.TITHI_NAMES[tithi_number - 1]
-            lookup = tithi_number
-
         else:
             paksha = "Krishna"
-            name = Tithi.TITHI_NAMES[tithi_number - 16]
 
-            if tithi_number == 30:
-                return TithiInfo(
-                    "Amavasya",
-                    30,
-                    "Krishna",
-                    "Research",
-                    "Research Pending",
-                )
+        # Amavasya handled separately
+        if tithi_number == 30:
+            group = "Research"
+            lord = "Research Pending"
+        else:
+            group = self.GROUPS[(tithi_number - 1) % 5]
+            lord = self.LORDS[group]
 
-            lookup = tithi_number - 15
-
-        group, lord = Tithi.GROUPS[lookup]
-
-        return TithiInfo(
-            name,
-            tithi_number,
-            paksha,
-            group,
-            lord,
+        return Tithi(
+            name=name,
+            paksha=paksha,
+            group=group,
+            lord=lord,
         )
