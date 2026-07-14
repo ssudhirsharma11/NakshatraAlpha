@@ -12,6 +12,7 @@ from services.astronomy_service import AstronomyService
 from astrology.zodiac import Zodiac
 from astrology.nakshatra import Nakshatra
 from astrology.tithi import TithiCalculator
+from astrology.hora import HoraCalculator
 
 
 class Application:
@@ -40,20 +41,33 @@ class Application:
         # -----------------------------
         # Current Panchang
         # -----------------------------
+
         tithi = TithiCalculator().get()
+        hora = HoraCalculator().get()
 
         self.logger.info("")
         self.logger.info("Current Panchang")
         self.logger.info("----------------------------------")
+
         self.logger.info(f"Paksha      : {tithi.paksha}")
         self.logger.info(f"Tithi       : {tithi.name}")
         self.logger.info(f"Tithi Group : {tithi.group}")
         self.logger.info(f"Tithi Lord  : {tithi.lord}")
+
+        self.logger.info("")
+        self.logger.info("Current Hora")
+        self.logger.info("----------------------------------")
+        self.logger.info(f"Weekday     : {hora.weekday}")
+        self.logger.info(f"Hora Number : {hora.number}")
+        self.logger.info(f"Hora Lord   : {hora.lord}")
+        self.logger.info(f"Next Hora   : {hora.next_lord}")
+
         self.logger.info("")
 
         # -----------------------------
         # Planetary Positions
         # -----------------------------
+
         self.logger.info("Planetary Positions")
         self.logger.info("----------------------------------")
 
