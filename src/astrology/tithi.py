@@ -12,8 +12,11 @@ from services.ephemeris_service import EphemerisService
 @dataclass
 class Tithi:
 
+    number: int
     name: str
     paksha: str
+    phase: str
+    illumination: float
     group: str
     lord: str
 
@@ -53,13 +56,13 @@ class TithiCalculator:
         "Amavasya",
     ]
 
-    GROUPS = [
-        "Nanda",
-        "Bhadra",
-        "Jaya",
-        "Rikta",
-        "Poorna",
-    ]
+    GROUPS = {
+        1: "Nanda",
+        2: "Bhadra",
+        3: "Jaya",
+        4: "Rikta",
+        5: "Poorna",
+    }
 
     LORDS = {
         "Nanda": "Venus",
@@ -76,35 +79,45 @@ class TithiCalculator:
         sun = ephemeris.current_sun_longitude()
         moon = ephemeris.current_moon_longitude()
 
-        difference = moon - sun
+        difference = (moon - sun) % 360.0
 
-        if difference < 0:
-            difference += 360.0
+        tithi_number = int(difference // 12.0) + 1
 
-        # 1 to 30
-        tithi_number = int(difference / 12.0) + 1
-
-        if tithi_number > 30:
-            tithi_number = 30
-
-        name = self.TITHI_NAMES[tithi_number - 1]
+        tithi_name = self.TITHI_NAMES[tithi_number - 1]
 
         if tithi_number <= 15:
             paksha = "Shukla"
+            phase = "Waxing"
         else:
             paksha = "Krishna"
+            phase = "Waning"
 
-        # Amavasya handled separately
-        if tithi_number == 30:
-            group = "Research"
+        illumination = 100 - abs(180 - difference) / 180 * 100
+
+        remainder = tithi_number % 5
+
+        if remainder == 1:
+            group = "Nanda"
+        elif remainder == 2:
+            group = "Bhadra"
+        elif remainder == 3:
+            group = "Jaya"
+        elif remainder == 4:
+            group = "Rikta"
+        else:
+            group = "Poorna"
+
+        if tithi_name == "Amavasya":
             lord = "Research Pending"
         else:
-            group = self.GROUPS[(tithi_number - 1) % 5]
             lord = self.LORDS[group]
 
         return Tithi(
-            name=name,
+            number=tithi_number,
+            name=tithi_name,
             paksha=paksha,
+            phase=phase,
+            illumination=round(illumination, 1),
             group=group,
             lord=lord,
         )
