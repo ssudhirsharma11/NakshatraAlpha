@@ -13,6 +13,7 @@ from astrology.zodiac import Zodiac
 from astrology.nakshatra import Nakshatra
 from astrology.tithi import TithiCalculator
 from astrology.hora import HoraCalculator
+from astrology.planet_dignity import PlanetDignity
 
 
 class Application:
@@ -38,9 +39,9 @@ class Application:
 
         self.logger.info(f"Loaded {len(positions)} planetary objects.")
 
-        # -----------------------------
+        # -------------------------------------------------
         # Current Panchang
-        # -----------------------------
+        # -------------------------------------------------
 
         tithi = TithiCalculator().get()
         hora = HoraCalculator().get()
@@ -57,6 +58,7 @@ class Application:
         self.logger.info("")
         self.logger.info("Current Hora")
         self.logger.info("----------------------------------")
+
         self.logger.info(f"Weekday     : {hora.weekday}")
         self.logger.info(f"Hora Number : {hora.number}")
         self.logger.info(f"Hora Lord   : {hora.lord}")
@@ -64,23 +66,29 @@ class Application:
 
         self.logger.info("")
 
-        # -----------------------------
-        # Planetary Positions
-        # -----------------------------
+        # -------------------------------------------------
+        # Planetary Positions & Dignity
+        # -------------------------------------------------
 
-        self.logger.info("Planetary Positions")
-        self.logger.info("----------------------------------")
+        self.logger.info("Planetary Positions & Dignity")
+        self.logger.info("--------------------------------------------------------------------------")
 
         for planet in positions:
 
             sign = Zodiac.sign(planet.longitude)
             nakshatra = Nakshatra.get(planet.longitude)
 
+            dignity = PlanetDignity.get(
+                planet.planet,
+                sign,
+            )
+
             self.logger.info(
-                f"{planet.planet.value:8} "
-                f"{planet.longitude:7.2f}°   "
-                f"{sign:8} "
-                f"{nakshatra}"
+                f"{planet.planet.value:9}"
+                f"{planet.longitude:8.2f}°   "
+                f"{sign:12}"
+                f"{nakshatra:20}"
+                f"{dignity}"
             )
 
         self.logger.info("")
