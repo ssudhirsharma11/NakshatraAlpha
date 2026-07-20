@@ -32,16 +32,24 @@ research engine capable of analysing:
 
 ---
 
-## Roadmap
+# Roadmap
 
-- Planet Position Engine
+## ✅ v0.1.0 – Foundation Release
+- Swiss Ephemeris integration
 - Panchang Engine
-- Ephemeris Integration
-- Market Data Engine
-- Correlation Engine
-- Prediction Models
-- Backtesting Framework
-- Dashboard
+- Hora Engine
+- Planet Dignity Engine
+- Sunrise/Sunset
+
+## 🚧 v0.2.0 – Planet Strength Engine
+- Planet Strength Score
+- Aspect Engine
+- Improved Console Report
+
+## 🔮 v0.3.0 – Financial Astrology
+- Financial Astrology Rules
+- Market Strength Index
+- Sector Analysis
 
 ---
 
