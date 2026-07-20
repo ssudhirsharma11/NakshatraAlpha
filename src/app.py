@@ -8,6 +8,7 @@ from core.config import Configuration
 from core.logger import get_logger
 
 from services.astronomy_service import AstronomyService
+from services.sun_service import SunService
 
 from astrology.zodiac import Zodiac
 from astrology.nakshatra import Nakshatra
@@ -45,33 +46,56 @@ class Application:
 
         tithi = TithiCalculator().get()
         hora = HoraCalculator().get()
+        sun = SunService().get()
 
         self.logger.info("")
         self.logger.info("Current Panchang")
         self.logger.info("----------------------------------")
-
         self.logger.info(f"Paksha      : {tithi.paksha}")
         self.logger.info(f"Tithi       : {tithi.name}")
         self.logger.info(f"Tithi Group : {tithi.group}")
         self.logger.info(f"Tithi Lord  : {tithi.lord}")
 
+        # -------------------------------------------------
+        # Current Hora
+        # -------------------------------------------------
+
         self.logger.info("")
         self.logger.info("Current Hora")
         self.logger.info("----------------------------------")
-
         self.logger.info(f"Weekday     : {hora.weekday}")
         self.logger.info(f"Hora Number : {hora.number}")
         self.logger.info(f"Hora Lord   : {hora.lord}")
         self.logger.info(f"Next Hora   : {hora.next_lord}")
 
+        # -------------------------------------------------
+        # Current Sun
+        # -------------------------------------------------
+
         self.logger.info("")
+        self.logger.info("Current Sun")
+        self.logger.info("----------------------------------")
+        self.logger.info(f"Sunrise     : {sun.sunrise.strftime('%H:%M:%S')}")
+        self.logger.info(f"Sunset      : {sun.sunset.strftime('%H:%M:%S')}")
+        self.logger.info(f"Daylight    : {sun.daylight_hours:.2f} hrs")
 
         # -------------------------------------------------
         # Planetary Positions & Dignity
         # -------------------------------------------------
 
+        self.logger.info("")
         self.logger.info("Planetary Positions & Dignity")
-        self.logger.info("--------------------------------------------------------------------------")
+        self.logger.info("-" * 82)
+
+        self.logger.info(
+            f"{'Planet':<10}"
+            f"{'Longitude':>10}   "
+            f"{'Sign':<12}"
+            f"{'Nakshatra':<22}"
+            f"{'Dignity'}"
+        )
+
+        self.logger.info("-" * 82)
 
         for planet in positions:
 
@@ -84,19 +108,13 @@ class Application:
             )
 
             self.logger.info(
-                f"{planet.planet.value:9}"
-                f"{planet.longitude:8.2f}°   "
-                f"{sign:12}"
-                f"{nakshatra:20}"
-                f"{dignity}"
+                f"{planet.planet.value:<10}"
+                f"{planet.longitude:>9.2f}°   "
+                f"{sign:<12}"
+                f"{nakshatra:<22}"
+                f"{dignity:<20}"
             )
 
         self.logger.info("")
-
-        self.logger.info(
-            f"Application Version : {config.version}"
-        )
-
-        self.logger.info(
-            "Bootstrap completed successfully."
-        )
+        self.logger.info(f"Application Version : {config.version}")
+        self.logger.info("Bootstrap completed successfully.")
