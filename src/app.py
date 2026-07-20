@@ -15,6 +15,7 @@ from astrology.nakshatra import Nakshatra
 from astrology.tithi import TithiCalculator
 from astrology.hora import HoraCalculator
 from astrology.planet_dignity import PlanetDignity
+from astrology.planet_strength import PlanetStrength
 
 
 class Application:
@@ -113,6 +114,37 @@ class Application:
                 f"{sign:<12}"
                 f"{nakshatra:<22}"
                 f"{dignity:<20}"
+            )
+
+        # -------------------------------------------------
+        # Planet Strength
+        # -------------------------------------------------
+
+        self.logger.info("")
+        self.logger.info("Planet Strength")
+        self.logger.info("-" * 55)
+
+        self.logger.info(
+            f"{'Planet':<10}"
+            f"{'Score':>8}"
+            f"{'Rating':>18}"
+        )
+
+        self.logger.info("-" * 55)
+
+        for planet in positions:
+
+            sign = Zodiac.sign(planet.longitude)
+
+            strength = PlanetStrength.get(
+                planet.planet,
+                sign,
+            )
+
+            self.logger.info(
+                f"{planet.planet.value:<10}"
+                f"{strength.score:>8}"
+                f"{strength.rating:>18}"
             )
 
         self.logger.info("")
