@@ -8,7 +8,7 @@ from datetime import datetime
 
 import swisseph as swe
 
-from models.planet import Planet
+from src.models.planet import Planet
 
 
 class EphemerisService:
@@ -16,20 +16,34 @@ class EphemerisService:
     def __init__(self):
         swe.set_ephe_path("data")
 
-    def julian_day(self):
+    @staticmethod
+    def julian_day(timestamp: datetime) -> float:
+        """
+        Convert a datetime into Julian Day (UTC).
+        """
 
-        now = datetime.utcnow()
+        utc_time = timestamp.astimezone().astimezone()
 
-        return swe.julday(
-            now.year,
-            now.month,
-            now.day,
-            now.hour + now.minute / 60.0,
+        hour = (
+            utc_time.hour
+            + utc_time.minute / 60.0
+            + utc_time.second / 3600.0
         )
 
-    def current_longitude(self, planet: Planet):
+        return swe.julday(
+            utc_time.year,
+            utc_time.month,
+            utc_time.day,
+            hour,
+        )
 
-        jd = self.julian_day()
+    def get_longitude(
+        self,
+        planet: Planet,
+        timestamp: datetime,
+    ) -> float:
+
+        jd = self.julian_day(timestamp)
 
         planet_map = {
             Planet.SUN: swe.SUN,
@@ -50,14 +64,7 @@ class EphemerisService:
 
         longitude = result[0]
 
-        # Ketu is always opposite Rahu
         if planet == Planet.KETU:
             longitude = (longitude + 180.0) % 360.0
 
-        return longitude
-
-    def current_sun_longitude(self):
-        return self.current_longitude(Planet.SUN)
-
-    def current_moon_longitude(self):
-        return self.current_longitude(Planet.MOON)
+        return round(longitude, 6)
