@@ -1,33 +1,33 @@
 """
 Planet Relationship Engine
 
-Calculates relative sign positions between planets.
+Calculates relative house positions between planets.
 
 Example
 
 Sun     : Cancer
-Saturn : Pisces
+Saturn  : Pisces
 
-Result = 9
+Distance = 9
 
 The result is always between 1 and 12.
 
-1 = Same sign
-2 = Second sign
+1 = Same house/sign
+2 = Second
 ...
-12 = Twelfth sign
+12 = Twelfth
 """
-
 
 from src.models.planet_position import PlanetPosition
 
 
-def relative_sign_distance(
+def relative_house_distance(
     from_planet: PlanetPosition,
     to_planet: PlanetPosition,
 ) -> int:
     """
-    Returns the relative sign distance.
+    Returns the relative house/sign distance
+    from one planet to another.
 
     Example
 
@@ -35,7 +35,7 @@ def relative_sign_distance(
 
     To   : Pisces (12)
 
-    Distance = 9
+    Result = 9
     """
 
     distance = (
@@ -46,12 +46,19 @@ def relative_sign_distance(
     return distance + 1
 
 
-def is_1_4_7_10(distance: int) -> bool:
+def is_kendra(distance: int) -> bool:
     """
-    Research helper.
-
-    Returns True when distance is
-    1,4,7 or 10.
+    Returns True if the distance is a
+    Kendra position (1, 4, 7 or 10).
     """
 
     return distance in (1, 4, 7, 10)
+
+
+# ------------------------------------------------------------------
+# Backward compatibility
+# Remove these aliases after all modules have been migrated.
+# ------------------------------------------------------------------
+
+relative_sign_distance = relative_house_distance
+is_1_4_7_10 = is_kendra
