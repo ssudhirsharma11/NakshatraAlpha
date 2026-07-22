@@ -7,18 +7,16 @@ Represents one astronomical snapshot.
 from dataclasses import dataclass
 from datetime import datetime
 
-
-@dataclass
-class PlanetPosition:
-    name: str
-    longitude: float
-    latitude: float
-    distance: float
-    speed: float
+from src.models.planet import Planet
+from src.models.planet_position import PlanetPosition
 
 
-@dataclass
+@dataclass(frozen=True)
 class Chart:
+    """
+    Represents a complete astronomical snapshot
+    for a given timestamp and location.
+    """
 
     timestamp: datetime
 
@@ -29,10 +27,46 @@ class Chart:
 
     sun: PlanetPosition
     moon: PlanetPosition
-    mars: PlanetPosition
     mercury: PlanetPosition
-    jupiter: PlanetPosition
     venus: PlanetPosition
+    mars: PlanetPosition
+    jupiter: PlanetPosition
     saturn: PlanetPosition
     rahu: PlanetPosition
     ketu: PlanetPosition
+
+    def get(self, planet: Planet) -> PlanetPosition:
+        """
+        Returns the position of the requested planet.
+        """
+
+        mapping = {
+            Planet.SUN: self.sun,
+            Planet.MOON: self.moon,
+            Planet.MERCURY: self.mercury,
+            Planet.VENUS: self.venus,
+            Planet.MARS: self.mars,
+            Planet.JUPITER: self.jupiter,
+            Planet.SATURN: self.saturn,
+            Planet.RAHU: self.rahu,
+            Planet.KETU: self.ketu,
+        }
+
+        return mapping[planet]
+
+    def all_positions(self) -> dict[Planet, PlanetPosition]:
+        """
+        Returns all planetary positions as a dictionary.
+        """
+
+        return {
+            Planet.SUN: self.sun,
+            Planet.MOON: self.moon,
+            Planet.MERCURY: self.mercury,
+            Planet.VENUS: self.venus,
+            Planet.MARS: self.mars,
+            Planet.JUPITER: self.jupiter,
+            Planet.SATURN: self.saturn,
+            Planet.RAHU: self.rahu,
+            Planet.KETU: self.ketu,
+        }

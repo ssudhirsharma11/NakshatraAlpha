@@ -4,13 +4,17 @@ Planet Position Model
 
 from dataclasses import dataclass
 
-from models.planet import Planet
+from src.models.planet import Planet
 
 
-@dataclass
+@dataclass(frozen=True)
 class PlanetPosition:
+    """
+    Represents the astronomical position of a planet at a specific timestamp.
+    """
 
     planet: Planet
     longitude: float
     latitude: float
+    distance: float
     speed: float

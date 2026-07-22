@@ -40,14 +40,21 @@ def main():
 
     for planet in planets:
 
-        longitude = ephemeris.get_longitude(
+        position = ephemeris.get_position(
             planet,
             timestamp,
         )
 
-        print(f"{planet.name:<10} {longitude:10.6f}°")
+        print(
+            f"{planet.name:<10}"
+            f"Lon: {position.longitude:10.6f}°   "
+            f"Lat: {position.latitude:9.6f}°   "
+            f"Dist: {position.distance:10.6f}   "
+            f"Speed: {position.speed:10.6f}"
+        )
 
     print("=" * 65)
+
 
 
 if __name__ == "__main__":

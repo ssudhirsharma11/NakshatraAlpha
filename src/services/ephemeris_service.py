@@ -4,30 +4,36 @@ Swiss Ephemeris Service
 Responsible for all astronomical calculations.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 import swisseph as swe
 
 from src.models.planet import Planet
+from src.models.planet_position import PlanetPosition
 
 
 class EphemerisService:
+    """
+    Provides deterministic planetary positions using Swiss Ephemeris.
+    """
 
     def __init__(self):
         swe.set_ephe_path("data")
+        swe.set_sid_mode(swe.SIDM_LAHIRI)
 
     @staticmethod
     def julian_day(timestamp: datetime) -> float:
         """
-        Convert a datetime into Julian Day (UTC).
+        Convert a timezone-aware datetime into Julian Day (UTC).
         """
 
-        utc_time = timestamp.astimezone().astimezone()
+        utc_time = timestamp.astimezone(timezone.utc)
 
         hour = (
             utc_time.hour
             + utc_time.minute / 60.0
             + utc_time.second / 3600.0
+            + utc_time.microsecond / 3_600_000_000.0
         )
 
         return swe.julday(
@@ -37,15 +43,9 @@ class EphemerisService:
             hour,
         )
 
-    def get_longitude(
-        self,
-        planet: Planet,
-        timestamp: datetime,
-    ) -> float:
-
-        jd = self.julian_day(timestamp)
-
-        planet_map = {
+    @staticmethod
+    def _planet_map():
+        return {
             Planet.SUN: swe.SUN,
             Planet.MOON: swe.MOON,
             Planet.MERCURY: swe.MERCURY,
@@ -57,14 +57,48 @@ class EphemerisService:
             Planet.KETU: swe.MEAN_NODE,
         }
 
+    def get_position(
+        self,
+        planet: Planet,
+        timestamp: datetime,
+    ) -> PlanetPosition:
+
+        jd = self.julian_day(timestamp)
+
+        flags = swe.FLG_SWIEPH | swe.FLG_SIDEREAL | swe.FLG_SPEED
+
         result, _ = swe.calc_ut(
             jd,
-            planet_map[planet],
+            self._planet_map()[planet],
+            flags,
         )
 
         longitude = result[0]
+        latitude = result[1]
+        distance = result[2]
+        speed = result[3]
 
         if planet == Planet.KETU:
             longitude = (longitude + 180.0) % 360.0
 
-        return round(longitude, 6)
+        return PlanetPosition(
+            planet=planet,
+            longitude=longitude,
+            latitude=latitude,
+            distance=distance,
+            speed=speed,
+        )
+
+    def get_longitude(
+        self,
+        planet: Planet,
+        timestamp: datetime,
+    ) -> float:
+        """
+        Backward-compatible wrapper.
+        """
+
+        return self.get_position(
+            planet,
+            timestamp,
+        ).longitude
