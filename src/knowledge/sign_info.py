@@ -4,7 +4,7 @@ Sign Information
 Permanent knowledge of zodiac signs.
 """
 
-from models.planet import Planet
+from src.models.planet import Planet
 
 SIGN_INFO = {
 

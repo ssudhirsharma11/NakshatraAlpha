@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 
 import swisseph as swe
 
+from src.astrology.navamsha import navamsha_details
 from src.models.planet import Planet
 from src.models.planet_position import PlanetPosition
 
@@ -81,12 +82,26 @@ class EphemerisService:
         if planet == Planet.KETU:
             longitude = (longitude + 180.0) % 360.0
 
+        # -----------------------------
+        # Astrology Calculations (D1/D9)
+        # -----------------------------
+        details = navamsha_details(longitude)
+
         return PlanetPosition(
             planet=planet,
+
             longitude=longitude,
             latitude=latitude,
             distance=distance,
             speed=speed,
+
+            rashi=details["rashi"],
+            rashi_number=details["rashi_number"],
+            degrees_in_rashi=details["degrees_in_rashi"],
+
+            navamsha=details["navamsha"],
+            navamsha_number=details["navamsha_number"],
+            navamsha_lord=details["navamsha_lord"],
         )
 
     def get_longitude(

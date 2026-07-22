@@ -1,55 +1,73 @@
 """
-Sprint 20B - Kite Service
+Kite Service
 
-Purpose:
-- Read API credentials from .env
-- Create an authenticated KiteConnect client
-- Verify the connection
+Purpose
+-------
+Provides a single authenticated KiteConnect client for the application.
 """
 
 import os
+from pathlib import Path
 
 from dotenv import load_dotenv
 from kiteconnect import KiteConnect
 
-load_dotenv()
+# Load .env from project root
+ENV_PATH = Path(__file__).resolve().parents[2] / ".env"
+
+print(f"\nLoading .env from:\n{ENV_PATH}")
+
+load_dotenv(dotenv_path=ENV_PATH, override=True)
 
 
 class KiteService:
-    """Service responsible for Zerodha Kite authentication."""
+    """
+    Handles Kite authentication and provides an authenticated client.
+    """
 
     def __init__(self):
+
         self.api_key = os.getenv("KITE_API_KEY")
         self.access_token = os.getenv("KITE_ACCESS_TOKEN")
 
+        print("\nAPI Key Loaded :", self.api_key)
+
+        if self.access_token:
+            print("Access Token :", self.access_token[:8] + "...")
+            print("Access Token Length :", len(self.access_token))
+        else:
+            print("Access Token : None")
+
         if not self.api_key:
-            raise ValueError("KITE_API_KEY not found in .env")
+            raise ValueError("KITE_API_KEY missing")
 
         if not self.access_token:
-            raise ValueError("KITE_ACCESS_TOKEN not found in .env")
+            raise ValueError("KITE_ACCESS_TOKEN missing")
 
-        self.kite = KiteConnect(api_key=self.api_key)
-        self.kite.set_access_token(self.access_token)
+        self._kite = KiteConnect(api_key=self.api_key)
+        self._kite.set_access_token(self.access_token)
 
-    def connect(self):
+    def get_client(self) -> KiteConnect:
         """
-        Returns an authenticated KiteConnect client.
+        Return the authenticated KiteConnect client.
         """
-        return self.kite
+        return self._kite
 
     def is_connected(self) -> bool:
         """
-        Returns True if the access token is valid.
+        Verify authentication by fetching the user profile.
         """
         try:
-            self.kite.profile()
-            return True
-        except Exception as e:
-            print(f"Connection failed: {e}")
-            return False
+            profile = self._kite.profile()
 
-    def logout(self):
-        """
-        Clears the local Kite client.
-        """
-        self.kite = None
+            print("\nAuthenticated User:")
+            print(profile["user_name"])
+
+            return True
+
+        except Exception as e:
+
+            print("\nAuthentication Error:")
+            print(e)
+
+            return False
