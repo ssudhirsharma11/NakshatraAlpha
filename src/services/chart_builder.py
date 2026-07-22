@@ -13,32 +13,34 @@ from src.services.ephemeris_service import EphemerisService
 
 class ChartBuilder:
     """
-    Builds a complete Chart for a given timestamp and location.
+    Stateless builder for astronomical charts.
     """
 
-    def __init__(self):
-        self.ephemeris = EphemerisService()
+    _ephemeris = EphemerisService()
 
+    @classmethod
     def build(
-        self,
+        cls,
         timestamp: datetime,
         latitude: float,
         longitude: float,
     ) -> Chart:
 
+        ephemeris = cls._ephemeris
+
         return Chart(
             timestamp=timestamp,
             latitude=latitude,
             longitude=longitude,
-            julian_day=self.ephemeris.julian_day(timestamp),
+            julian_day=ephemeris.julian_day(timestamp),
 
-            sun=self.ephemeris.get_position(Planet.SUN, timestamp),
-            moon=self.ephemeris.get_position(Planet.MOON, timestamp),
-            mercury=self.ephemeris.get_position(Planet.MERCURY, timestamp),
-            venus=self.ephemeris.get_position(Planet.VENUS, timestamp),
-            mars=self.ephemeris.get_position(Planet.MARS, timestamp),
-            jupiter=self.ephemeris.get_position(Planet.JUPITER, timestamp),
-            saturn=self.ephemeris.get_position(Planet.SATURN, timestamp),
-            rahu=self.ephemeris.get_position(Planet.RAHU, timestamp),
-            ketu=self.ephemeris.get_position(Planet.KETU, timestamp),
+            sun=ephemeris.get_position(Planet.SUN, timestamp),
+            moon=ephemeris.get_position(Planet.MOON, timestamp),
+            mercury=ephemeris.get_position(Planet.MERCURY, timestamp),
+            venus=ephemeris.get_position(Planet.VENUS, timestamp),
+            mars=ephemeris.get_position(Planet.MARS, timestamp),
+            jupiter=ephemeris.get_position(Planet.JUPITER, timestamp),
+            saturn=ephemeris.get_position(Planet.SATURN, timestamp),
+            rahu=ephemeris.get_position(Planet.RAHU, timestamp),
+            ketu=ephemeris.get_position(Planet.KETU, timestamp),
         )

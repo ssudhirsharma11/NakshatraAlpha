@@ -39,20 +39,7 @@ class Chart:
         """
         Returns the position of the requested planet.
         """
-
-        mapping = {
-            Planet.SUN: self.sun,
-            Planet.MOON: self.moon,
-            Planet.MERCURY: self.mercury,
-            Planet.VENUS: self.venus,
-            Planet.MARS: self.mars,
-            Planet.JUPITER: self.jupiter,
-            Planet.SATURN: self.saturn,
-            Planet.RAHU: self.rahu,
-            Planet.KETU: self.ketu,
-        }
-
-        return mapping[planet]
+        return self.all_positions()[planet]
 
     def all_positions(self) -> dict[Planet, PlanetPosition]:
         """

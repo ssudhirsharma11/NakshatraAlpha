@@ -1,46 +1,54 @@
 """
-Nakshatra Utilities
+Nakshatra Engine
 
-Converts planetary longitude into one of the
-27 Vedic Nakshatras.
+Calculates the Nakshatra occupied by a planet.
 """
 
+from src.knowledge.nakshatra_data import (
+    NAKSHATRA_DATA,
+    NAKSHATRA_SIZE,
+    PADA_SIZE,
+)
+from src.models.chart import Chart
+from src.models.nakshatra_enum import Nakshatra
+from src.models.nakshatra_position import NakshatraPosition
+from src.models.planet import Planet
 
-class Nakshatra:
 
-    NAKSHATRAS = [
-        "Ashwini",
-        "Bharani",
-        "Krittika",
-        "Rohini",
-        "Mrigashira",
-        "Ardra",
-        "Punarvasu",
-        "Pushya",
-        "Ashlesha",
-        "Magha",
-        "Purva Phalguni",
-        "Uttara Phalguni",
-        "Hasta",
-        "Chitra",
-        "Swati",
-        "Vishakha",
-        "Anuradha",
-        "Jyeshtha",
-        "Moola",
-        "Purva Ashadha",
-        "Uttara Ashadha",
-        "Shravana",
-        "Dhanishta",
-        "Shatabhisha",
-        "Purva Bhadrapada",
-        "Uttara Bhadrapada",
-        "Revati",
-    ]
+class NakshatraEngine:
+    """
+    Calculates Nakshatra information for a planet.
+    """
 
     @staticmethod
-    def get(longitude: float):
+    def calculate(
+        chart: Chart,
+        planet: Planet,
+    ) -> NakshatraPosition:
 
-        index = int(longitude / (360 / 27))
+        longitude = chart.get(planet).longitude % 360.0
 
-        return Nakshatra.NAKSHATRAS[index]
+        index = int(longitude / NAKSHATRA_SIZE)
+
+        nakshatra = list(Nakshatra)[index]
+
+        metadata = NAKSHATRA_DATA[nakshatra]
+
+        degrees_in = longitude - metadata.start_degree
+
+        degrees_remaining = metadata.end_degree - longitude
+
+        pada = int(degrees_in / PADA_SIZE) + 1
+
+        # Safety against floating point edge cases
+        pada = max(1, min(4, pada))
+
+        return NakshatraPosition(
+            planet=planet,
+            nakshatra=metadata.nakshatra,
+            number=metadata.number,
+            pada=pada,
+            lord=metadata.lord,
+            degrees_in_nakshatra=degrees_in,
+            degrees_remaining=degrees_remaining,
+        )
