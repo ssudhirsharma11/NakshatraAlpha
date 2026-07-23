@@ -1,17 +1,14 @@
-"""
-Location Model
-
-Represents a geographical location used for
-astronomical calculations.
-"""
-
 from dataclasses import dataclass
 
 
-@dataclass
+@dataclass(frozen=True)
 class Location:
+    """
+    Represents a geographical location used for astronomical
+    and astrological calculations.
+    """
 
-    city: str
+    name: str
     latitude: float
     longitude: float
     timezone: str
