@@ -1,5 +1,7 @@
 """
 Planet Position Model
+
+Represents the astronomical position of a planet.
 """
 
 from dataclasses import dataclass
@@ -9,23 +11,17 @@ from src.models.planet import Planet
 
 @dataclass(frozen=True)
 class PlanetPosition:
-    """
-    Represents the astronomical + astrological position of a planet.
-    """
-
     planet: Planet
 
+    # Sidereal longitude (0°–360°)
     longitude: float
+
+    # Ecliptic latitude
     latitude: float
-    distance: float
+
+    # Daily motion (degrees/day)
     speed: float
 
-    # D1
-    rashi: str
-    rashi_number: int
-    degrees_in_rashi: float
-
-    # D9
-    navamsha: str
-    navamsha_number: int
-    navamsha_lord: Planet
+    @property
+    def is_retrograde(self) -> bool:
+        return self.speed < 0

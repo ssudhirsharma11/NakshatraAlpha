@@ -1,0 +1,67 @@
+"""
+Golden Planet Position Dataset
+
+Reference planetary positions validated against Swiss Ephemeris.
+"""
+
+from dataclasses import dataclass
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
+from src.models.planet import Planet
+
+
+@dataclass(frozen=True)
+class ExpectedPlanetPosition:
+    longitude: float
+    latitude: float
+    speed: float
+
+
+REFERENCE_DATETIME = datetime(
+    2026,
+    6,
+    29,
+    9,
+    0,
+    tzinfo=ZoneInfo("Asia/Kolkata"),
+)
+
+
+GOLDEN_PLANET_POSITIONS = {
+    Planet.SUN: ExpectedPlanetPosition(
+        73.20586865,
+        -0.00012047,
+        0.95327370,
+    ),
+    Planet.MOON: ExpectedPlanetPosition(
+        243.88419999,
+        -4.53238951,
+        11.88086364,
+    ),
+    Planet.MARS: ExpectedPlanetPosition(
+        36.00874216,
+        -0.32201152,
+        0.71302055,
+    ),
+    Planet.MERCURY: ExpectedPlanetPosition(
+        92.01466410,
+        -2.01333155,
+        0.04519370,
+    ),
+    Planet.JUPITER: ExpectedPlanetPosition(
+        95.53602790,
+        0.43706631,
+        0.21310981,
+    ),
+    Planet.VENUS: ExpectedPlanetPosition(
+        113.85758010,
+        1.83069402,
+        1.13770941,
+    ),
+    Planet.SATURN: ExpectedPlanetPosition(
+        349.87489236,
+        -2.37426036,
+        0.04582844,
+    ),
+}

@@ -5,16 +5,17 @@ Responsible for sunrise, sunset and daylight calculations.
 """
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date, datetime
 
 from astral import LocationInfo
 from astral.sun import sun
 from zoneinfo import ZoneInfo
 
-from core.defaults import DEFAULT_LOCATION
+from src.config.research_config import RESEARCH_LOCATION
+from src.models.location import Location
 
 
-@dataclass
+@dataclass(frozen=True)
 class SunInfo:
     sunrise: datetime
     sunset: datetime
@@ -23,30 +24,43 @@ class SunInfo:
 
 class SunService:
 
-    def get(self):
+    def get(
+        self,
+        calculation_date: date | None = None,
+        location: Location | None = None,
+    ) -> SunInfo:
+        """
+        Returns sunrise/sunset information for the requested date and location.
 
-        location = LocationInfo(
-            DEFAULT_LOCATION.city,
-            "India",
-            DEFAULT_LOCATION.timezone,
-            DEFAULT_LOCATION.latitude,
-            DEFAULT_LOCATION.longitude,
+        If no date/location is supplied, the research defaults are used.
+        """
+
+        if location is None:
+            location = RESEARCH_LOCATION
+
+        tz = ZoneInfo(location.timezone)
+
+        if calculation_date is None:
+            calculation_date = datetime.now(tz).date()
+
+        astral_location = LocationInfo(
+            name=location.name,
+            region="India",
+            timezone=location.timezone,
+            latitude=location.latitude,
+            longitude=location.longitude,
         )
 
-        tz = ZoneInfo(DEFAULT_LOCATION.timezone)
-
         s = sun(
-            observer=location.observer,
-            date=datetime.now(tz).date(),
+            observer=astral_location.observer,
+            date=calculation_date,
             tzinfo=tz,
         )
 
         sunrise = s["sunrise"]
         sunset = s["sunset"]
 
-        daylight = (
-            sunset - sunrise
-        ).total_seconds() / 3600.0
+        daylight = (sunset - sunrise).total_seconds() / 3600.0
 
         return SunInfo(
             sunrise=sunrise,
