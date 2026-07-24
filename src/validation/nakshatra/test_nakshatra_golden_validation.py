@@ -1,10 +1,11 @@
 """
-Golden Validation - Tithi
+Golden Validation - Nakshatra
 """
 
 from datetime import datetime
 
-from src.astrology.tithi import TithiEngine
+from src.astrology.nakshatra import NakshatraEngine
+from src.models.planet import Planet
 from src.services.chart_builder import ChartBuilder
 from src.validation.csv_reader import CsvReader
 from src.validation.framework.validator import Validator
@@ -16,29 +17,30 @@ LONGITUDE = 77.2090
 
 def main():
 
-    validator = Validator("Tithi")
+    validator = Validator("Nakshatra")
 
     rows = CsvReader.read(
-        "src/validation/tithi/tithi_golden.csv"
+        "src/validation/nakshatra/nakshatra_golden.csv"
     )
 
     for row in rows:
 
-        timestamp = datetime.fromisoformat(
-            row["timestamp"]
-        )
-
         chart = ChartBuilder.build(
-            timestamp,
+            datetime.fromisoformat(
+                row["timestamp"]
+            ),
             LATITUDE,
             LONGITUDE,
         )
 
-        result = TithiEngine.calculate(chart)
+        result = NakshatraEngine.calculate(
+            chart,
+            Planet[row["planet"]],
+        )
 
         validator.compare(
-            int(row["tithi_number"]),
-            result.number,
+            row["nakshatra"],
+            result.nakshatra.name,
         )
 
     validator.finish()
