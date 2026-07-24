@@ -6,6 +6,7 @@ Contains immutable metadata for all 30 Tithis.
 
 from dataclasses import dataclass
 
+from src.models.paksha import Paksha
 from src.models.tithi_enum import Tithi
 
 
@@ -20,7 +21,7 @@ class TithiData:
 
     number: int
     tithi: Tithi
-    paksha: str
+    paksha: Paksha
     start_angle: float
     end_angle: float
 
@@ -31,7 +32,7 @@ for tithi in Tithi:
 
     number = tithi.value
 
-    paksha = "Shukla" if number <= 15 else "Krishna"
+    paksha = Paksha.SHUKLA if number <= 15 else Paksha.KRISHNA
 
     start = (number - 1) * TITHI_SIZE
     end = number * TITHI_SIZE

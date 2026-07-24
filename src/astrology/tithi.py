@@ -33,13 +33,15 @@ class TithiEngine:
 
         index = int(angular_distance / TITHI_SIZE)
 
-        tithi = list(Tithi)[index]
+        tithi = Tithi(index + 1)
 
         metadata = TITHI_DATA[tithi]
 
         degrees_in_tithi = angular_distance - metadata.start_angle
 
-        degrees_remaining = metadata.end_angle - angular_distance
+        degrees_remaining = TITHI_SIZE - degrees_in_tithi
+
+        progress = (degrees_in_tithi / TITHI_SIZE) * 100.0
 
         return TithiPosition(
             tithi=metadata.tithi,
@@ -48,4 +50,5 @@ class TithiEngine:
             angular_distance=angular_distance,
             degrees_in_tithi=degrees_in_tithi,
             degrees_remaining=degrees_remaining,
+            progress=progress,
         )

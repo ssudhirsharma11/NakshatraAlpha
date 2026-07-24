@@ -27,10 +27,13 @@ class NakshatraEngine:
     ) -> NakshatraPosition:
 
         longitude = chart.get(planet).longitude % 360.0
+        index = min(
+        26,
+        int(longitude / NAKSHATRA_SIZE),
+    )
 
-        index = int(longitude / NAKSHATRA_SIZE)
-
-        nakshatra = list(Nakshatra)[index]
+        
+        nakshatra = Nakshatra(index + 1)
 
         metadata = NAKSHATRA_DATA[nakshatra]
 
@@ -51,4 +54,4 @@ class NakshatraEngine:
             lord=metadata.lord,
             degrees_in_nakshatra=degrees_in,
             degrees_remaining=degrees_remaining,
-        )
+        )   

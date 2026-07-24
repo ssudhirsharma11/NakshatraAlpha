@@ -4,6 +4,7 @@ Tithi Position Model
 
 from dataclasses import dataclass
 
+from src.models.paksha import Paksha
 from src.models.tithi_enum import Tithi
 
 
@@ -17,10 +18,12 @@ class TithiPosition:
 
     number: int
 
-    paksha: str
+    paksha: Paksha
 
     angular_distance: float
 
     degrees_in_tithi: float
 
     degrees_remaining: float
+
+    progress: float

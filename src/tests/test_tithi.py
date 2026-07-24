@@ -41,11 +41,12 @@ def main():
 
     print(f"Tithi             : {result.tithi.name}")
     print(f"Tithi Number      : {result.number}")
-    print(f"Paksha            : {result.paksha}")
+    print(f"Paksha            : {result.paksha.value}")
     print()
 
     print(f"Degrees In Tithi  : {result.degrees_in_tithi:.2f}°")
     print(f"Degrees Remaining : {result.degrees_remaining:.2f}°")
+    print(f"Progress          : {result.progress:.2f}%")
 
     print("=" * 70)
 
