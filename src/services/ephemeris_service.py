@@ -15,7 +15,8 @@ from src.models.planet_position import PlanetPosition
 
 class EphemerisService:
     """
-    Provides deterministic planetary positions using Swiss Ephemeris.
+    Provides deterministic astronomical calculations
+    using Swiss Ephemeris.
     """
 
     def __init__(self):
@@ -82,23 +83,17 @@ class EphemerisService:
         if planet == Planet.KETU:
             longitude = (longitude + 180.0) % 360.0
 
-        # -----------------------------
-        # Astrology Calculations (D1/D9)
-        # -----------------------------
         details = navamsha_details(longitude)
 
         return PlanetPosition(
             planet=planet,
-
             longitude=longitude,
             latitude=latitude,
             distance=distance,
             speed=speed,
-
             rashi=details["rashi"],
             rashi_number=details["rashi_number"],
             degrees_in_rashi=details["degrees_in_rashi"],
-
             navamsha=details["navamsha"],
             navamsha_number=details["navamsha_number"],
             navamsha_lord=details["navamsha_lord"],
@@ -117,3 +112,27 @@ class EphemerisService:
             planet,
             timestamp,
         ).longitude
+
+    def get_ascendant(
+        self,
+        timestamp: datetime,
+        latitude: float,
+        longitude: float,
+    ) -> float:
+        """
+        Returns the sidereal ascendant longitude (0°–360°).
+        """
+
+        jd = self.julian_day(timestamp)
+
+        flags = swe.FLG_SIDEREAL
+
+        cusps, ascmc = swe.houses_ex(
+            jd,
+            latitude,
+            longitude,
+            b'W',
+            flags,
+        )
+
+        return ascmc[0]
