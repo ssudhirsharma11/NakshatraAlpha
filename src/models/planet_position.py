@@ -11,6 +11,7 @@ throughout the astrology engine.
 from dataclasses import dataclass
 
 from src.models.planet import Planet
+from src.models.sign import Sign
 
 
 @dataclass(frozen=True)
@@ -31,14 +32,14 @@ class PlanetPosition:
     # -------------------------
     # Zodiac (D1)
     # -------------------------
-    rashi: str
+    rashi: Sign
     rashi_number: int
     degrees_in_rashi: float
 
     # -------------------------
     # Navamsha (D9)
     # -------------------------
-    navamsha: str
+    navamsha: Sign
     navamsha_number: int
     navamsha_lord: Planet
 

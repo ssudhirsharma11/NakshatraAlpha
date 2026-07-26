@@ -4,11 +4,17 @@ Chart Model
 Represents one astronomical snapshot.
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from src.models.planet import Planet
 from src.models.planet_position import PlanetPosition
+
+if TYPE_CHECKING:
+    from src.models.lagna_position import LagnaPosition
 
 
 @dataclass(frozen=True)
@@ -34,6 +40,10 @@ class Chart:
     saturn: PlanetPosition
     rahu: PlanetPosition
     ketu: PlanetPosition
+
+    # Astrology modules populate this as they become available.
+    # None indicates the value has not yet been calculated.
+    lagna: LagnaPosition | None = None
 
     def get(self, planet: Planet) -> PlanetPosition:
         """

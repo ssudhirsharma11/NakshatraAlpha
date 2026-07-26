@@ -43,4 +43,7 @@ class ChartBuilder:
             saturn=ephemeris.get_position(Planet.SATURN, timestamp),
             rahu=ephemeris.get_position(Planet.RAHU, timestamp),
             ketu=ephemeris.get_position(Planet.KETU, timestamp),
+
+            # Will be populated in Sprint B.
+            lagna=None,
         )

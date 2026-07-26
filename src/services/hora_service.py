@@ -1,14 +1,15 @@
-from datetime import date, timedelta
+from datetime import date, datetime
 
 from src.models.hora import Hora
-from src.models.planet import Planet
 from src.models.location import Location
+from src.models.planet import Planet
 from src.services.sun_service import SunService
 
 
 class HoraService:
     """
-    Computes daytime Hora periods.
+    Computes daytime Hora periods and returns
+    the active Hora for a given timestamp.
     """
 
     HORA_SEQUENCE = (
@@ -31,14 +32,17 @@ class HoraService:
         6: Planet.SUN,       # Sunday
     }
 
-    def __init__(self):
-        self.sun_service = SunService()
+    def __init__(self, sun_service: SunService | None = None):
+        self.sun_service = sun_service or SunService()
 
     def get_day_horas(
         self,
         calculation_date: date,
         location: Location,
     ) -> list[Hora]:
+        """
+        Returns the 12 daytime Hora periods for the given date.
+        """
 
         sun = self.sun_service.get(
             calculation_date=calculation_date,
@@ -51,15 +55,13 @@ class HoraService:
         hora_length = (sunset - sunrise) / 12
 
         weekday_lord = self.WEEKDAY_LORD[calculation_date.weekday()]
-
         start_index = self.HORA_SEQUENCE.index(weekday_lord)
 
-        horas = []
+        horas: list[Hora] = []
 
         current_start = sunrise
 
         for i in range(12):
-
             current_end = current_start + hora_length
 
             planet = self.HORA_SEQUENCE[
@@ -79,3 +81,31 @@ class HoraService:
             current_start = current_end
 
         return horas
+
+    def get_hora(
+        self,
+        timestamp: datetime,
+        location: Location,
+    ) -> Hora:
+        """
+        Returns the active daytime Hora for the supplied timestamp.
+
+        Raises
+        ------
+        ValueError
+            If the timestamp does not fall within the daytime
+            Hora interval.
+        """
+
+        horas = self.get_day_horas(
+            calculation_date=timestamp.date(),
+            location=location,
+        )
+
+        for hora in horas:
+            if hora.start <= timestamp < hora.end:
+                return hora
+
+        raise ValueError(
+            f"No daytime Hora found for timestamp {timestamp}."
+        )

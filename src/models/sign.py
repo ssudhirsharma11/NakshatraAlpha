@@ -27,19 +27,56 @@ class Sign(Enum):
 
     @staticmethod
     def from_index(index: int) -> "Sign":
-        signs = list(Sign)
-        return signs[index % 12]
+        """
+        Returns the sign for a zero-based index.
+
+        0 = Aries
+        1 = Taurus
+        ...
+        11 = Pisces
+        """
+        return tuple(Sign)[index % 12]
 
     @staticmethod
     def from_name(name: str) -> "Sign":
+        """
+        Returns the Sign enum from its display name.
+        """
         for sign in Sign:
             if sign.label == name:
                 return sign
+
         raise ValueError(f"Unknown sign: {name}")
+
+    @staticmethod
+    def from_longitude(longitude: float) -> "Sign":
+        """
+        Returns the zodiac sign for an ecliptic longitude.
+        """
+        longitude = longitude % 360.0
+        index = int(longitude // 30.0)
+        return Sign.from_index(index)
+
+    @staticmethod
+    def degrees_in_sign(longitude: float) -> float:
+        """
+        Returns the longitude within the current sign.
+
+        Example:
+            37.5° -> 7.5°
+            295°  -> 25°
+        """
+        return longitude % 30.0
 
     @property
     def number(self) -> int:
-        return list(Sign).index(self) + 1
+        """
+        Aries = 1
+        Taurus = 2
+        ...
+        Pisces = 12
+        """
+        return tuple(Sign).index(self) + 1
 
     def __str__(self):
         return self.label

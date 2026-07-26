@@ -1,4 +1,4 @@
-from astrology.navamsha import navamsha_details
+from src.astrology.navamsha import navamsha_details
 
 print("=" * 50)
 

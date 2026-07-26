@@ -1,59 +1,67 @@
 """
-Zodiac Engine
+Zodiac (Rashi) calculations.
 
-Converts a celestial longitude (0°–360°)
-into Zodiac Sign information.
+Provides reusable zodiac calculations independent of
+Navamsha or any divisional chart.
 """
 
-from dataclasses import dataclass
-
-
-@dataclass
-class ZodiacSign:
-    sign_number: int
-    sign_name: str
-    degree_in_sign: float
-
-
-SIGNS = [
-    "Aries",
-    "Taurus",
-    "Gemini",
-    "Cancer",
-    "Leo",
-    "Virgo",
-    "Libra",
-    "Scorpio",
-    "Sagittarius",
-    "Capricorn",
-    "Aquarius",
-    "Pisces",
-]
+from src.models.sign import Sign
 
 
 class ZodiacEngine:
+    """
+    Stateless zodiac calculation engine.
+
+    Kept for backward compatibility with existing tests
+    and future service usage.
+    """
 
     @staticmethod
-    def get_sign(longitude: float) -> ZodiacSign:
-        """
-        Parameters
-        ----------
-        longitude : float
-            Planet longitude between 0° and <360°
+    def normalize_longitude(longitude: float) -> float:
+        return longitude % 360.0
 
-        Returns
-        -------
-        ZodiacSign
-        """
+    @staticmethod
+    def sign_index(longitude: float) -> int:
+        return int(ZodiacEngine.normalize_longitude(longitude) // 30)
 
-        longitude = longitude % 360
+    @staticmethod
+    def sign(longitude: float) -> Sign:
+        return Sign(ZodiacEngine.sign_index(longitude) + 1)
 
-        sign_number = int(longitude // 30)
+    @staticmethod
+    def degrees_in_sign(longitude: float) -> float:
+        return ZodiacEngine.normalize_longitude(longitude) % 30.0
 
-        degree_in_sign = longitude % 30
+    @staticmethod
+    def zodiac_details(longitude: float) -> dict:
+        rashi = ZodiacEngine.sign(longitude)
 
-        return ZodiacSign(
-            sign_number=sign_number + 1,
-            sign_name=SIGNS[sign_number],
-            degree_in_sign=round(degree_in_sign, 4),
-        )
+        return {
+            "rashi": rashi,
+            "rashi_number": rashi.value,
+            "degrees_in_rashi": ZodiacEngine.degrees_in_sign(longitude),
+        }
+
+
+# ------------------------------------------------------------------
+# Backward-compatible function wrappers
+# ------------------------------------------------------------------
+
+def normalize_longitude(longitude: float) -> float:
+    return ZodiacEngine.normalize_longitude(longitude)
+
+
+def sign_index(longitude: float) -> int:
+    return ZodiacEngine.sign_index(longitude)
+
+
+def sign(longitude: float) -> Sign:
+    return ZodiacEngine.sign(longitude)
+
+
+def degrees_in_sign(longitude: float) -> float:
+    return ZodiacEngine.degrees_in_sign(longitude)
+
+
+def zodiac_details(longitude: float) -> dict:
+    return ZodiacEngine.zodiac_details(longitude)

@@ -1,31 +1,35 @@
 """
 Lagna Position Model
-"""
 
-from __future__ import annotations
+Represents the Ascendant (Lagna) position in the zodiac.
+"""
 
 from dataclasses import dataclass
 
-from src.models.zodiac import ZodiacSign
+from src.models.sign import Sign
 
 
 @dataclass(frozen=True)
 class LagnaPosition:
     """
-    Represents the Ascendant (Lagna).
+    Immutable representation of the Ascendant.
     """
 
     longitude: float
-    sign: ZodiacSign
-    degree_in_sign: float
 
-    @property
-    def sign_number(self) -> int:
-        return self.sign.value
+    rashi: Sign
+    rashi_number: int
+    degrees_in_rashi: float
 
     @property
     def formatted(self) -> str:
+        """
+        Human-readable representation.
+
+        Example:
+            Aries 12.3456°
+        """
         return (
-            f"{self.sign.name} "
-            f"{self.degree_in_sign:.4f}°"
+            f"{self.rashi.name} "
+            f"{self.degrees_in_rashi:.4f}°"
         )

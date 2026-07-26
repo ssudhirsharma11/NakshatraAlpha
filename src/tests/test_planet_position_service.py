@@ -25,13 +25,15 @@ def test_planet_positions():
     )
 
     expected_planets = {
-        Planet.SUN,
-        Planet.MOON,
-        Planet.MARS,
-        Planet.MERCURY,
-        Planet.JUPITER,
-        Planet.VENUS,
-        Planet.SATURN,
+    Planet.SUN,
+    Planet.MOON,
+    Planet.MARS,
+    Planet.MERCURY,
+    Planet.JUPITER,
+    Planet.VENUS,
+    Planet.SATURN,
+    Planet.RAHU,
+    Planet.KETU,
     }
 
     assert set(positions.keys()) == expected_planets
