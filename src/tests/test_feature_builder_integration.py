@@ -4,6 +4,7 @@ Feature Builder Integration Tests
 
 from datetime import datetime, timezone
 
+from src import features
 from src.features.feature_builder import FeatureBuilder
 from src.services.chart_builder import ChartBuilder
 
@@ -31,6 +32,10 @@ def test_feature_builder_populates_core_features():
 
     # Calendar
     assert features.weekday is not None
+    # Tithi
+    assert features.tithi is not None
+    assert 1 <= features.tithi_number <= 30
+    assert features.paksha is not None
 
     # Lagna
     assert features.lagna_sign is not None

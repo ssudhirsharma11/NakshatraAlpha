@@ -9,6 +9,7 @@ from src.astrology.planet_relationship import (
     is_kendra,
     relative_house_distance,
 )
+from src.astrology.tithi import TithiEngine
 from src.models.chart import Chart
 from src.models.feature_set import FeatureSet
 from src.models.planet import Planet
@@ -40,6 +41,8 @@ class FeatureBuilder:
             Planet.SUN,
         )
 
+        tithi = TithiEngine.calculate(chart)
+
         return FeatureSet(
             chart=chart,
 
@@ -50,16 +53,12 @@ class FeatureBuilder:
             weekday=chart.timestamp.weekday(),
 
             # ------------------------------------------------------------------
-            # Hora
-            # ------------------------------------------------------------------
-
-            # (Will be populated in a later sprint.)
-
-            # ------------------------------------------------------------------
             # Tithi
             # ------------------------------------------------------------------
 
-            # (Will be populated in a later sprint.)
+            tithi=tithi.tithi,
+            tithi_number=tithi.number,
+            paksha=tithi.paksha,
 
             # ------------------------------------------------------------------
             # Nakshatra
