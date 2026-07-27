@@ -4,12 +4,14 @@ Feature Builder
 Converts a Chart into a FeatureSet.
 """
 
+from src.astrology.nakshatra import NakshatraEngine
 from src.astrology.planet_relationship import (
     is_kendra,
     relative_house_distance,
 )
 from src.models.chart import Chart
 from src.models.feature_set import FeatureSet
+from src.models.planet import Planet
 
 
 class FeatureBuilder:
@@ -28,6 +30,16 @@ class FeatureBuilder:
             chart.saturn,
         )
 
+        moon_nakshatra = NakshatraEngine.calculate(
+            chart,
+            Planet.MOON,
+        )
+
+        sun_nakshatra = NakshatraEngine.calculate(
+            chart,
+            Planet.SUN,
+        )
+
         return FeatureSet(
             chart=chart,
 
@@ -36,6 +48,30 @@ class FeatureBuilder:
             # ------------------------------------------------------------------
 
             weekday=chart.timestamp.weekday(),
+
+            # ------------------------------------------------------------------
+            # Hora
+            # ------------------------------------------------------------------
+
+            # (Will be populated in a later sprint.)
+
+            # ------------------------------------------------------------------
+            # Tithi
+            # ------------------------------------------------------------------
+
+            # (Will be populated in a later sprint.)
+
+            # ------------------------------------------------------------------
+            # Nakshatra
+            # ------------------------------------------------------------------
+
+            moon_nakshatra=moon_nakshatra.nakshatra,
+            moon_nakshatra_number=moon_nakshatra.number,
+
+            sun_nakshatra=sun_nakshatra.nakshatra,
+            sun_nakshatra_number=sun_nakshatra.number,
+
+            pada=moon_nakshatra.pada,
 
             # ------------------------------------------------------------------
             # Lagna

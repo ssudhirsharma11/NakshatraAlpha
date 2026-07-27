@@ -5,7 +5,7 @@ Builds a complete astronomical chart.
 """
 
 from datetime import datetime
-
+from src.astrology.lagna import LagnaEngine
 from src.models.chart import Chart
 from src.models.planet import Planet
 from src.services.ephemeris_service import EphemerisService
@@ -44,6 +44,9 @@ class ChartBuilder:
             rahu=ephemeris.get_position(Planet.RAHU, timestamp),
             ketu=ephemeris.get_position(Planet.KETU, timestamp),
 
-            # Will be populated in Sprint B.
-            lagna=None,
+            lagna=LagnaEngine.calculate(
+            timestamp=timestamp,
+            latitude=latitude,
+            longitude=longitude,
+        ),
         )
