@@ -1,89 +1,85 @@
 """
 Feature Builder
 
-Builds a research-ready FeatureSet from a Chart.
+Converts a Chart into a FeatureSet.
 """
 
-from src.astrology.nakshatra import NakshatraEngine
-from src.astrology.tithi import TithiEngine
 from src.astrology.planet_relationship import (
-    relative_house_distance,
     is_kendra,
+    relative_house_distance,
 )
-
-from src.features.feature_set import FeatureSet
-
 from src.models.chart import Chart
-from src.models.planet import Planet
+from src.models.feature_set import FeatureSet
 
 
 class FeatureBuilder:
     """
-    Converts a Chart into a research FeatureSet.
+    Builds derived research features from
+    an astronomical chart.
     """
 
-    @staticmethod
-    def build(chart: Chart) -> FeatureSet:
-
-        # ----------------------------------------
-        # Nakshatra Features
-        # ----------------------------------------
-
-        moon_nak = NakshatraEngine.calculate(
-            chart,
-            Planet.MOON,
-        )
-
-        sun_nak = NakshatraEngine.calculate(
-            chart,
-            Planet.SUN,
-        )
-
-        # ----------------------------------------
-        # Tithi Features
-        # ----------------------------------------
-
-        tithi = TithiEngine.calculate(chart)
-
-        # ----------------------------------------
-        # Planet Relationship Features
-        # ----------------------------------------
+    def build(self, chart: Chart) -> FeatureSet:
+        """
+        Generate all research features.
+        """
 
         saturn_distance = relative_house_distance(
             chart.sun,
             chart.saturn,
         )
 
-        # ----------------------------------------
-        # Build Feature Set
-        # ----------------------------------------
-
         return FeatureSet(
-
             chart=chart,
 
-            # --------------------------
-            # Nakshatra
-            # --------------------------
+            # ------------------------------------------------------------------
+            # Calendar
+            # ------------------------------------------------------------------
 
-            moon_nakshatra=moon_nak.nakshatra.name,
-            moon_nakshatra_number=moon_nak.number,
+            weekday=chart.timestamp.weekday(),
 
-            sun_nakshatra=sun_nak.nakshatra.name,
-            sun_nakshatra_number=sun_nak.number,
+            # ------------------------------------------------------------------
+            # Lagna
+            # ------------------------------------------------------------------
 
-            # --------------------------
-            # Tithi
-            # --------------------------
+            lagna_sign=(
+                chart.lagna.rashi
+                if chart.lagna
+                else None
+            ),
 
-            tithi=tithi.tithi.name,
-            tithi_number=tithi.number,
+            lagna_number=(
+                chart.lagna.rashi_number
+                if chart.lagna
+                else None
+            ),
 
-            paksha=tithi.paksha,
+            lagna_degree=(
+                chart.lagna.longitude
+                if chart.lagna
+                else None
+            ),
 
-            # --------------------------
-            # Planet Relationships
-            # --------------------------
+            # ------------------------------------------------------------------
+            # Planet Positions
+            # ------------------------------------------------------------------
+
+            sun_longitude=chart.sun.longitude,
+            moon_longitude=chart.moon.longitude,
+
+            sun_sign=chart.sun.rashi,
+            sun_sign_number=chart.sun.rashi_number,
+
+            moon_sign=chart.moon.rashi,
+            moon_sign_number=chart.moon.rashi_number,
+
+            sun_navamsha=chart.sun.navamsha,
+            moon_navamsha=chart.moon.navamsha,
+
+            saturn_sign=chart.saturn.rashi,
+
+            # ------------------------------------------------------------------
+            # Relationships
+            # ------------------------------------------------------------------
 
             saturn_from_sun=saturn_distance,
 

@@ -11,11 +11,11 @@ from typing import Optional
 
 from src.models.chart import Chart
 from src.models.hora import Hora
-from src.models.nakshatra_enum import NakshatraEnum
+from src.models.nakshatra_enum import Nakshatra
 from src.models.paksha import Paksha
 from src.models.planet import Planet
 from src.models.sign import Sign
-from src.models.tithi_enum import TithiEnum
+from src.models.tithi_enum import Tithi
 
 
 @dataclass(slots=True)
@@ -48,7 +48,7 @@ class FeatureSet:
     # Tithi
     # ------------------------------------------------------------------
 
-    tithi: Optional[TithiEnum] = None
+    tithi: Optional[Tithi] = None
     tithi_number: Optional[int] = None
     paksha: Optional[Paksha] = None
 
@@ -56,10 +56,10 @@ class FeatureSet:
     # Nakshatra
     # ------------------------------------------------------------------
 
-    moon_nakshatra: Optional[NakshatraEnum] = None
+    moon_nakshatra: Optional[Nakshatra] = None
     moon_nakshatra_number: Optional[int] = None
 
-    sun_nakshatra: Optional[NakshatraEnum] = None
+    sun_nakshatra: Optional[Nakshatra] = None
     sun_nakshatra_number: Optional[int] = None
 
     pada: Optional[int] = None

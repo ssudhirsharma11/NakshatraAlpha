@@ -5,12 +5,11 @@ Converts a Chart into a FeatureSet.
 """
 
 from src.astrology.planet_relationship import (
-    relative_house_distance,
     is_kendra,
+    relative_house_distance,
 )
-
+from src.models.chart import Chart
 from src.models.feature_set import FeatureSet
-from src.astrology.zodiac import ZodiacEngine
 
 
 class FeatureBuilder:
@@ -19,7 +18,7 @@ class FeatureBuilder:
     an astronomical chart.
     """
 
-    def build(self, chart):
+    def build(self, chart: Chart) -> FeatureSet:
         """
         Generate all research features.
         """
@@ -29,31 +28,38 @@ class FeatureBuilder:
             chart.saturn,
         )
 
-        sun_sign = ZodiacEngine.sign(chart.sun.longitude)
-        moon_sign = ZodiacEngine.sign(chart.moon.longitude)
-        saturn_sign = ZodiacEngine.sign(chart.saturn.longitude)
-
         return FeatureSet(
             chart=chart,
 
+            # ------------------------------------------------------------------
             # Calendar
-            weekday=chart.datetime.weekday(),
+            # ------------------------------------------------------------------
 
-            # Planet positions
+            weekday=chart.timestamp.weekday(),
+
+            # ------------------------------------------------------------------
+            # Planet Positions
+            # ------------------------------------------------------------------
+
             sun_longitude=chart.sun.longitude,
             moon_longitude=chart.moon.longitude,
 
-            sun_sign=sun_sign,
-            sun_sign_number=sun_sign.number,
+            sun_sign=chart.sun.rashi,
+            sun_sign_number=chart.sun.rashi_number,
 
-            moon_sign=moon_sign,
-            moon_sign_number=moon_sign.number,
+            moon_sign=chart.moon.rashi,
+            moon_sign_number=chart.moon.rashi_number,
 
-            saturn_sign=saturn_sign,
+            sun_navamsha=chart.sun.navamsha,
+            moon_navamsha=chart.moon.navamsha,
 
+            saturn_sign=chart.saturn.rashi,
+
+            # ------------------------------------------------------------------
             # Relationships
-            saturn_from_sun=saturn_distance,
+            # ------------------------------------------------------------------
 
+            saturn_from_sun=saturn_distance,
             saturn_kendra_from_sun=is_kendra(
                 saturn_distance
             ),
