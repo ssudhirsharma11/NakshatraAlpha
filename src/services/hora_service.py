@@ -32,7 +32,10 @@ class HoraService:
         6: Planet.SUN,       # Sunday
     }
 
-    def __init__(self, sun_service: SunService | None = None):
+    def __init__(
+        self,
+        sun_service: SunService | None = None,
+    ):
         self.sun_service = sun_service or SunService()
 
     def get_day_horas(
@@ -41,7 +44,8 @@ class HoraService:
         location: Location,
     ) -> list[Hora]:
         """
-        Returns the 12 daytime Hora periods for the given date.
+        Returns the 12 daytime Hora periods
+        for the supplied date.
         """
 
         sun = self.sun_service.get(
@@ -54,18 +58,25 @@ class HoraService:
 
         hora_length = (sunset - sunrise) / 12
 
-        weekday_lord = self.WEEKDAY_LORD[calculation_date.weekday()]
-        start_index = self.HORA_SEQUENCE.index(weekday_lord)
+        weekday_lord = self.WEEKDAY_LORD[
+            calculation_date.weekday()
+        ]
+
+        start_index = self.HORA_SEQUENCE.index(
+            weekday_lord
+        )
 
         horas: list[Hora] = []
 
         current_start = sunrise
 
         for i in range(12):
+
             current_end = current_start + hora_length
 
             planet = self.HORA_SEQUENCE[
-                (start_index + i) % len(self.HORA_SEQUENCE)
+                (start_index + i)
+                % len(self.HORA_SEQUENCE)
             ]
 
             horas.append(
@@ -88,13 +99,14 @@ class HoraService:
         location: Location,
     ) -> Hora:
         """
-        Returns the active daytime Hora for the supplied timestamp.
+        Returns the active daytime Hora
+        for the supplied timestamp.
 
         Raises
         ------
         ValueError
-            If the timestamp does not fall within the daytime
-            Hora interval.
+            If timestamp is outside the
+            daytime Hora interval.
         """
 
         horas = self.get_day_horas(
@@ -103,6 +115,7 @@ class HoraService:
         )
 
         for hora in horas:
+
             if hora.start <= timestamp < hora.end:
                 return hora
 

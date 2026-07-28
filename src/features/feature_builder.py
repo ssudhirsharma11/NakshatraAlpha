@@ -21,7 +21,10 @@ class FeatureBuilder:
     an astronomical chart.
     """
 
-    def build(self, chart: Chart) -> FeatureSet:
+    def build(
+        self,
+        chart: Chart,
+    ) -> FeatureSet:
         """
         Generate all research features.
         """
