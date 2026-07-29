@@ -119,6 +119,10 @@ class HoraService:
             if hora.start <= timestamp < hora.end:
                 return hora
 
+        # Handle the exact sunset boundary by returning the final Hora.
+        if horas and timestamp == horas[-1].end:
+            return horas[-1]
+
         raise ValueError(
             f"No daytime Hora found for timestamp {timestamp}."
         )
