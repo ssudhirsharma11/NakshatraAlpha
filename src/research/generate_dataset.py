@@ -12,6 +12,7 @@ from pathlib import Path
 
 from src.research.dataset_builder import DatasetBuilder
 from src.research.dataset_enricher import DatasetEnricher
+from src.research.dataset_validator import DatasetValidator
 
 
 def main() -> None:
@@ -25,6 +26,10 @@ def main() -> None:
         parents=True,
         exist_ok=True,
     )
+
+    # ----------------------------------------------------------
+    # Build Raw Dataset
+    # ----------------------------------------------------------
 
     print("\nBuilding raw dataset...\n")
 
@@ -40,6 +45,23 @@ def main() -> None:
 
     print(f"✓ Raw dataset saved to {raw_file}")
 
+    # ----------------------------------------------------------
+    # Validate Raw Dataset
+    # ----------------------------------------------------------
+
+    print("\nValidating raw dataset...\n")
+
+    validator = DatasetValidator()
+
+    if not validator.validate(raw_file):
+        raise RuntimeError(
+            "Dataset validation failed. Research dataset not generated."
+        )
+
+    # ----------------------------------------------------------
+    # Enrich Dataset
+    # ----------------------------------------------------------
+
     print("\nEnriching dataset...\n")
 
     enricher = DatasetEnricher()
@@ -54,6 +76,10 @@ def main() -> None:
     )
 
     print(f"✓ Research dataset saved to {research_file}")
+
+    # ----------------------------------------------------------
+    # Summary
+    # ----------------------------------------------------------
 
     print("\n" + "=" * 70)
     print("SUMMARY")
