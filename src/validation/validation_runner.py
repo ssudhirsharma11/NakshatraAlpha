@@ -1,16 +1,17 @@
 """
 Validation Runner
 
-Runs validation cases against the astrology engines.
+Runs validation cases against the complete
+Feature Builder pipeline.
 """
+
+from __future__ import annotations
 
 from pathlib import Path
 
-from src.astrology.nakshatra import NakshatraEngine
-from src.astrology.tithi import TithiEngine
+from src.features.feature_builder import FeatureBuilder
 from src.services.chart_builder import ChartBuilder
 from src.validation.validation_loader import ValidationLoader
-from src.models.planet import Planet
 
 
 class ValidationRunner:
@@ -19,17 +20,51 @@ class ValidationRunner:
     """
 
     @staticmethod
-    def run(csv_path: str | Path):
+    def _compare(
+        label: str,
+        expected,
+        actual,
+    ) -> bool:
+
+        if expected is None:
+            return True
+
+        passed = expected == actual
+
+        print(
+            f"{label:<22}"
+            f"Expected : {expected}"
+        )
+
+        print(
+            f"{'':<22}"
+            f"Actual   : {actual}"
+        )
+
+        print(
+            f"{'':<22}"
+            f"{'PASS' if passed else 'FAIL'}"
+        )
+
+        print()
+
+        return passed
+
+    @staticmethod
+    def run(
+        csv_path: str | Path,
+    ):
 
         cases = ValidationLoader.load(csv_path)
 
+        feature_builder = FeatureBuilder()
+
         total_cases = 0
 
-        tithi_pass = 0
-        nakshatra_pass = 0
+        passed_fields = {}
 
         print("=" * 80)
-        print("VALIDATION REPORT")
+        print("NAKSHATRA ALPHA VALIDATION")
         print("=" * 80)
 
         for case in cases:
@@ -42,99 +77,177 @@ class ValidationRunner:
                 longitude=case.longitude,
             )
 
-            tithi = TithiEngine.calculate(chart)
+            features = feature_builder.build(chart)
 
-            moon_nakshatra = NakshatraEngine.calculate(
-                chart,
-                Planet.MOON,
+            print()
+            print("=" * 80)
+
+            print(
+                f"CASE {total_cases}"
+            )
+
+            print("=" * 80)
+
+            print(
+                f"Timestamp : {case.timestamp}"
             )
 
             print()
 
-            print("-" * 80)
+            checks = [
 
-            print(f"Case #{total_cases}")
+                (
+                    "Weekday",
+                    case.expected_weekday,
+                    chart.timestamp.strftime("%A"),
+                ),
 
-            print(f"Timestamp : {case.timestamp}")
-            print(f"Latitude  : {case.latitude}")
-            print(f"Longitude : {case.longitude}")
+                (
+                    "Tithi",
+                    case.expected_tithi,
+                    features.tithi.name,
+                ),
 
-            print()
+                (
+                    "Tithi Group",
+                    case.expected_tithi_group,
+                    (
+                        features.tithi_group.name
+                        if features.tithi_group
+                        else None
+                    ),
+                ),
 
-            if case.expected_tithi:
+                (
+                    "Tithi Lord",
+                    case.expected_tithi_lord,
+                    (
+                        features.tithi_lord.name
+                        if features.tithi_lord
+                        else None
+                    ),
+                ),
 
-                passed = (
-                    tithi.tithi.name ==
-                    case.expected_tithi
+                (
+                    "Paksha",
+                    case.expected_paksha,
+                    (
+                        features.paksha.name
+                        if features.paksha
+                        else None
+                    ),
+                ),
+
+                (
+                    "Moon Nakshatra",
+                    case.expected_moon_nakshatra,
+                    (
+                        features.moon_nakshatra.name
+                        if features.moon_nakshatra
+                        else None
+                    ),
+                ),
+
+                (
+                    "Pada",
+                    case.expected_pada,
+                    features.pada,
+                ),
+
+                (
+                    "Sun Sign",
+                    case.expected_sun_sign,
+                    (
+                        features.sun_sign.name
+                        if features.sun_sign
+                        else None
+                    ),
+                ),
+
+                (
+                    "Moon Sign",
+                    case.expected_moon_sign,
+                    (
+                        features.moon_sign.name
+                        if features.moon_sign
+                        else None
+                    ),
+                ),
+
+                (
+                    "Lagna",
+                    case.expected_lagna,
+                    (
+                        features.lagna_sign.name
+                        if features.lagna_sign
+                        else None
+                    ),
+                ),
+
+                (
+                    "Saturn From Sun",
+                    case.expected_saturn_from_sun,
+                    features.saturn_from_sun,
+                ),
+
+                (
+                    "Saturn From Moon",
+                    case.expected_saturn_from_moon,
+                    features.saturn_from_moon,
+                ),
+
+                (
+                    "Sade Sati",
+                    case.expected_sade_sati,
+                    features.sade_sati,
+                ),
+
+                (
+                    "Sade Sati Phase",
+                    case.expected_sade_sati_phase,
+                    features.sade_sati_phase,
+                ),
+
+            ]
+
+            for label, expected, actual in checks:
+
+                if expected is None:
+                    continue
+
+                passed = ValidationRunner._compare(
+                    label,
+                    expected,
+                    actual,
                 )
+
+                if label not in passed_fields:
+                    passed_fields[label] = 0
 
                 if passed:
-                    tithi_pass += 1
+                    passed_fields[label] += 1
 
-                print(
-                    f"Tithi      Expected : {case.expected_tithi}"
-                )
+        print()
+        print("=" * 80)
+        print("SUMMARY")
+        print("=" * 80)
 
-                print(
-                    f"Tithi      Actual   : {tithi.tithi.name}"
-                )
-
-                print(
-                    f"Status              : {'PASS' if passed else 'FAIL'}"
-                )
-
-                print()
-
-            if case.expected_nakshatra:
-
-                passed = (
-                    moon_nakshatra.nakshatra.name ==
-                    case.expected_nakshatra
-                )
-
-                if passed:
-                    nakshatra_pass += 1
-
-                print(
-                    f"Nakshatra Expected : {case.expected_nakshatra}"
-                )
-
-                print(
-                    f"Nakshatra Actual   : {moon_nakshatra.nakshatra.name}"
-                )
-
-                print(
-                    f"Status             : {'PASS' if passed else 'FAIL'}"
-                )
+        print(
+            f"Cases Tested : {total_cases}"
+        )
 
         print()
 
-        print("=" * 80)
-
-        print("SUMMARY")
-
-        print("=" * 80)
-
-        print(f"Cases Tested        : {total_cases}")
-
-        print(
-            f"Tithi Accuracy      : "
-            f"{tithi_pass}/{total_cases}"
-        )
-
-        print(
-            f"Nakshatra Accuracy  : "
-            f"{nakshatra_pass}/{total_cases}"
-        )
-
-        if (
-            tithi_pass == total_cases and
-            nakshatra_pass == total_cases
+        for field in sorted(
+            passed_fields.keys()
         ):
-            print("\nOVERALL RESULT : PASS")
-        else:
-            print("\nOVERALL RESULT : FAIL")
 
+            print(
+                f"{field:<22}"
+                f"{passed_fields[field]}/{total_cases}"
+            )
+
+        print()
         print("=" * 80)
 
 

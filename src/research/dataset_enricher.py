@@ -3,163 +3,72 @@ Dataset Enricher
 
 Adds derived market statistics to the raw research dataset.
 
-This class never modifies the input DataFrame.
-A new enriched DataFrame is returned.
+All market calculations are delegated to
+MarketFeatureBuilder.
+
+The enricher is now responsible only for
+DataFrame orchestration.
 """
 
 from __future__ import annotations
 
-import numpy as np
+from dataclasses import asdict
+
 import pandas as pd
+
+from src.features.market_feature_builder import (
+    MarketFeatureBuilder,
+)
 
 
 class DatasetEnricher:
     """
-    Enriches the raw dataset with derived market features.
+    Enriches the raw dataset with
+    derived market features.
     """
 
     def enrich(
         self,
         df: pd.DataFrame,
     ) -> pd.DataFrame:
-        """
-        Returns an enriched copy of the dataset.
-        """
 
         df = df.copy()
 
-        # ----------------------------------------------------
-        # Basic Price Components
-        # ----------------------------------------------------
+        # ---------------------------------------------
+        # Dataset Median (required for volatility)
+        # ---------------------------------------------
 
-        df["body"] = (df["close"] - df["open"]).abs()
-
-        df["range"] = df["high"] - df["low"]
-
-        df["upper_wick"] = (
-            df["high"] -
-            np.maximum(df["open"], df["close"])
-        )
-
-        df["lower_wick"] = (
-            np.minimum(df["open"], df["close"]) -
-            df["low"]
-        )
-
-        # ----------------------------------------------------
-        # Percentage Metrics
-        # ----------------------------------------------------
-
-        df["return_pct"] = (
-            (df["close"] - df["open"])
+        temp_range = (
+            (df["high"] - df["low"])
             / df["open"]
         ) * 100
 
-        df["range_pct"] = (
-            df["range"]
-            / df["open"]
-        ) * 100
+        median_range_pct = temp_range.median()
 
-        df["body_pct"] = np.where(
-            df["range"] == 0,
-            0,
-            (df["body"] / df["range"]) * 100,
-        )
+        rows = []
 
-        df["upper_wick_pct"] = np.where(
-            df["range"] == 0,
-            0,
-            (df["upper_wick"] / df["range"]) * 100,
-        )
+        for _, row in df.iterrows():
 
-        df["lower_wick_pct"] = np.where(
-            df["range"] == 0,
-            0,
-            (df["lower_wick"] / df["range"]) * 100,
-        )
+            features = MarketFeatureBuilder.build(
 
-        # ----------------------------------------------------
-        # Candle Position
-        # ----------------------------------------------------
+                open_price=row["open"],
 
-        df["close_position_pct"] = np.where(
-            df["range"] == 0,
-            50,
-            (
-                (df["close"] - df["low"])
-                / df["range"]
-            ) * 100,
-        )
+                high_price=row["high"],
 
-        df["open_position_pct"] = np.where(
-            df["range"] == 0,
-            50,
-            (
-                (df["open"] - df["low"])
-                / df["range"]
-            ) * 100,
-        )
+                low_price=row["low"],
 
-        # ----------------------------------------------------
-        # Direction
-        # ----------------------------------------------------
+                close_price=row["close"],
 
-        df["direction"] = np.select(
-            [
-                df["close"] > df["open"],
-                df["close"] < df["open"],
-            ],
-            [
-                "Bullish",
-                "Bearish",
-            ],
-            default="Neutral",
-        )
+                median_range_pct=median_range_pct,
 
-        # ----------------------------------------------------
-        # Strength Classification
-        # ----------------------------------------------------
+            )
 
-        conditions = [
-            df["return_pct"] >= 0.50,
-            (df["return_pct"] >= 0.20) &
-            (df["return_pct"] < 0.50),
+            row_dict = row.to_dict()
 
-            (df["return_pct"] > -0.20) &
-            (df["return_pct"] < 0.20),
+            row_dict.update(
+                asdict(features)
+            )
 
-            (df["return_pct"] <= -0.20) &
-            (df["return_pct"] > -0.50),
+            rows.append(row_dict)
 
-            df["return_pct"] <= -0.50,
-        ]
-
-        labels = [
-            "Strong Bull",
-            "Bull",
-            "Neutral",
-            "Bear",
-            "Strong Bear",
-        ]
-
-        df["strength"] = np.select(
-            conditions,
-            labels,
-            default="Neutral",
-        )
-
-        # ----------------------------------------------------
-        # Volatility
-        # ----------------------------------------------------
-
-        median_range = df["range_pct"].median()
-
-        df["high_volatility"] = (
-            df["range_pct"] >= median_range
-        )
-
-        df["low_volatility"] = (
-            df["range_pct"] < median_range
-        )
-
-        return df
+        return pd.DataFrame(rows)

@@ -1,16 +1,23 @@
 """
-Validation Case Model
+Validation Case
+
+Represents one golden validation test case.
 """
 
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Optional
 
 
-@dataclass(frozen=True)
+@dataclass(slots=True)
 class ValidationCase:
     """
-    Represents one external validation case.
+    One validation case loaded from CSV.
     """
+
+    # ---------------------------------------------------------
+    # Input
+    # ---------------------------------------------------------
 
     timestamp: datetime
 
@@ -18,6 +25,36 @@ class ValidationCase:
 
     longitude: float
 
-    expected_tithi: str | None = None
+    # ---------------------------------------------------------
+    # Expected Astrology
+    # ---------------------------------------------------------
 
-    expected_nakshatra: str | None = None
+    expected_weekday: Optional[str] = None
+
+    expected_hora: Optional[str] = None
+
+    expected_tithi: Optional[str] = None
+
+    expected_tithi_group: Optional[str] = None
+
+    expected_tithi_lord: Optional[str] = None
+
+    expected_paksha: Optional[str] = None
+
+    expected_moon_nakshatra: Optional[str] = None
+
+    expected_pada: Optional[int] = None
+
+    expected_sun_sign: Optional[str] = None
+
+    expected_moon_sign: Optional[str] = None
+
+    expected_lagna: Optional[str] = None
+
+    expected_saturn_from_sun: Optional[int] = None
+
+    expected_saturn_from_moon: Optional[int] = None
+
+    expected_sade_sati: Optional[bool] = None
+
+    expected_sade_sati_phase: Optional[str] = None

@@ -16,6 +16,7 @@ from src.models.paksha import Paksha
 from src.models.planet import Planet
 from src.models.sign import Sign
 from src.models.tithi_enum import Tithi
+from src.models.tithi_group import TithiGroup
 
 
 @dataclass(slots=True)
@@ -51,6 +52,9 @@ class FeatureSet:
     tithi: Optional[Tithi] = None
     tithi_number: Optional[int] = None
     paksha: Optional[Paksha] = None
+
+    tithi_group: Optional[TithiGroup] = None
+    tithi_lord: Optional[Planet] = None
 
     # ------------------------------------------------------------------
     # Nakshatra
@@ -91,19 +95,18 @@ class FeatureSet:
     saturn_sign: Optional[Sign] = None
 
     # ------------------------------------------------------------------
-    # Relationships
+    # Planet Relationships
     # ------------------------------------------------------------------
 
     saturn_from_sun: Optional[int] = None
     saturn_kendra_from_sun: Optional[bool] = None
 
     saturn_from_moon: Optional[int] = None
+    saturn_kendra_from_moon: Optional[bool] = None
 
     # ------------------------------------------------------------------
     # Sade Sati
     # ------------------------------------------------------------------
 
     sade_sati: Optional[bool] = None
-
-    # Rising / Peak / Setting
     sade_sati_phase: Optional[str] = None
