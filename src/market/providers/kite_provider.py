@@ -23,7 +23,7 @@ class KiteProvider(BaseMarketProvider):
     }
 
     def __init__(self):
-        self.kite: KiteConnect = KiteService().connect()
+        self.kite: KiteConnect = KiteService().get_client()
 
     def download(
         self,

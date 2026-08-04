@@ -20,6 +20,7 @@ import pandas as pd
 
 from src.config.research_config import RESEARCH_LOCATION
 from src.features.feature_builder import FeatureBuilder
+from src.features.market_feature_builder import MarketFeatureBuilder
 from src.services.chart_builder import ChartBuilder
 from src.services.hora_market_service import HoraMarketService
 from src.services.hora_service import HoraService
@@ -96,11 +97,19 @@ class DatasetBuilder:
                         hora
                     )
 
+                    market_features = MarketFeatureBuilder.build(
+                        open_price=market_result.market.open,
+                        high_price=market_result.market.high,
+                        low_price=market_result.market.low,
+                        close_price=market_result.market.close,
+                    )
+
                     rows.append(
                         self._create_row(
                             hora=hora,
                             features=features,
                             market=market_result.market,
+                            market_features=market_features,
                         )
                     )
 
@@ -125,6 +134,7 @@ class DatasetBuilder:
         hora,
         features,
         market,
+        market_features,
     ) -> dict:
 
         row: dict = {}
@@ -183,5 +193,15 @@ class DatasetBuilder:
         row["down_move"] = market.down_move
         row["trading_range"] = market.trading_range
         row["candle_count"] = market.candle_count
+
+        # -------------------------------------------------
+        # Derived Market Features
+        # -------------------------------------------------
+
+        row["return_pct"] = market_features.return_pct
+        row["direction"] = market_features.direction
+        row["strength"] = market_features.strength
+        row["body"] = market_features.body
+        row["trading_range"] = market_features.trading_range
 
         return row

@@ -1,108 +1,184 @@
 """
 Research Report
 
-Entry point for generating astrology + market reports.
+Generate astrology + market reports.
 
-Supported modes
+Examples
 
-- TIMESTAMP
-- DAY
-- RANGE
+Single Day
+----------
+
+python -m src.research.research_report ^
+    --day 2026-07-17
+
+Single Day - One Hora
+---------------------
+
+python -m src.research.research_report ^
+    --day 2026-07-17 ^
+    --hora 4
+
+Date Range
+----------
+
+python -m src.research.research_report ^
+    --start 2026-04-07 ^
+    --end 2026-04-10
+
+Date Range - One Hora
+---------------------
+
+python -m src.research.research_report ^
+    --start 2026-04-07 ^
+    --end 2026-04-10 ^
+    --hora 6
+
+Timestamp
+---------
+
+python -m src.research.research_report ^
+    --timestamp "2026-07-17 10:30"
 """
 
 from __future__ import annotations
 
-from datetime import date, datetime
+import argparse
+
+from datetime import date
+from datetime import datetime
 
 from src.research.report_printer import ReportPrinter
 from src.research.research_builder import ResearchBuilder
 
 
 # ==========================================================
-# CONFIGURATION
+# Helpers
 # ==========================================================
 
-REPORT_MODE = "DAY"
 
-# ----------------------------------------------------------
-# Timestamp Mode
-# ----------------------------------------------------------
+def parse_date(value: str) -> date:
 
-REPORT_TIMESTAMP = datetime(
-    2026,
-    7,
-    17,
-    10,
-    30,
-)
+    return datetime.strptime(
+        value,
+        "%Y-%m-%d",
+    ).date()
 
-# ----------------------------------------------------------
-# Day Mode
-# ----------------------------------------------------------
 
-REPORT_DATE = date(
-    2026,
-    7,
-    17,
-)
+def parse_timestamp(value: str) -> datetime:
 
-# ----------------------------------------------------------
-# Range Mode
-# ----------------------------------------------------------
+    return datetime.strptime(
+        value,
+        "%Y-%m-%d %H:%M",
+    )
 
-START_DATE = date(
-    2026,
-    7,
-    13,
-)
 
-END_DATE = date(
-    2026,
-    7,
-    17,
-)
+# ==========================================================
+# CLI
+# ==========================================================
 
-# ----------------------------------------------------------
-# Optional
-#
-# None = All market horas
-# 1-12 = Only one Hora
-# ----------------------------------------------------------
 
-REPORT_HORA = None
+def build_parser() -> argparse.ArgumentParser:
+
+    parser = argparse.ArgumentParser(
+        description="Nakshatra Alpha Research Report",
+    )
+
+    group = parser.add_mutually_exclusive_group(
+        required=True,
+    )
+
+    group.add_argument(
+        "--day",
+        type=parse_date,
+        help="Single trading day (YYYY-MM-DD)",
+    )
+
+    group.add_argument(
+        "--timestamp",
+        type=parse_timestamp,
+        help="Timestamp (YYYY-MM-DD HH:MM)",
+    )
+
+    group.add_argument(
+        "--start",
+        type=parse_date,
+        help="Start date for range",
+    )
+
+    parser.add_argument(
+        "--end",
+        type=parse_date,
+        help="End date for range",
+    )
+
+    parser.add_argument(
+        "--hora",
+        type=int,
+        choices=range(1, 13),
+        help="Optional Hora number (1-12)",
+    )
+
+    return parser
+
+
+# ==========================================================
+# Main
+# ==========================================================
 
 
 def main():
+
+    parser = build_parser()
+
+    args = parser.parse_args()
 
     builder = ResearchBuilder()
 
     printer = ReportPrinter()
 
-    if REPORT_MODE == "TIMESTAMP":
+    # ------------------------------------------------------
+    # Timestamp
+    # ------------------------------------------------------
+
+    if args.timestamp:
 
         rows = builder.build_timestamp(
-            REPORT_TIMESTAMP,
+            args.timestamp,
         )
 
-    elif REPORT_MODE == "DAY":
+    # ------------------------------------------------------
+    # Day
+    # ------------------------------------------------------
+
+    elif args.day:
 
         rows = builder.build_day(
-            REPORT_DATE,
-            REPORT_HORA,
+            args.day,
+            args.hora,
         )
 
-    elif REPORT_MODE == "RANGE":
+    # ------------------------------------------------------
+    # Range
+    # ------------------------------------------------------
+
+    elif args.start:
+
+        if args.end is None:
+
+            parser.error(
+                "--start requires --end"
+            )
 
         rows = builder.build_range(
-            START_DATE,
-            END_DATE,
-            REPORT_HORA,
+            args.start,
+            args.end,
+            args.hora,
         )
 
     else:
 
-        raise ValueError(
-            f"Unsupported REPORT_MODE: {REPORT_MODE}"
+        parser.error(
+            "No report type selected."
         )
 
     printer.print(rows)
