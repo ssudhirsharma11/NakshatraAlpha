@@ -1,26 +1,58 @@
 """
 Market Loader
 
-Loads validated historical market data for research.
+Loads validated historical market data
+from the local Parquet dataset.
 """
 
-from pathlib import Path
+from __future__ import annotations
 
 import pandas as pd
 
+from src.services.market_data_service import (
+    MarketDataService,
+)
+
 
 class MarketLoader:
+    """
+    Thin wrapper around MarketDataService.
 
-    def __init__(self, file_path: str):
-        self.file_path = Path(file_path)
+    Exists to isolate research modules from the
+    underlying storage format.
+    """
+
+    def __init__(self):
+
+        self.market_data = MarketDataService()
 
     def load(self) -> pd.DataFrame:
+        """
+        Returns the complete historical dataset.
+        """
 
-        if not self.file_path.exists():
-            raise FileNotFoundError(f"{self.file_path} not found.")
+        return self.market_data.get_all_data()
 
-        df = pd.read_csv(self.file_path)
+    def trading_days(self):
 
-        df["date"] = pd.to_datetime(df["date"])
+        return self.market_data.trading_days()
 
-        return df
+    def trading_day(
+        self,
+        trading_date,
+    ) -> pd.DataFrame:
+
+        return self.market_data.get_trading_day(
+            trading_date
+        )
+
+    def between(
+        self,
+        start,
+        end,
+    ) -> pd.DataFrame:
+
+        return self.market_data.get_between(
+            start,
+            end,
+        )

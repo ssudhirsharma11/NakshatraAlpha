@@ -35,6 +35,7 @@ class HoraMarketService:
         self,
         market_data_service: MarketDataService | None = None,
     ):
+
         self.market_data_service = (
             market_data_service
             or MarketDataService()
@@ -49,7 +50,7 @@ class HoraMarketService:
         hora: Hora,
     ) -> HoraMarketResult:
         """
-        Uses the full Hora interval.
+        Uses the complete Hora interval.
         """
 
         return self.build_between(
@@ -77,9 +78,20 @@ class HoraMarketService:
         )
 
         if candles.empty:
+
+            available_start = (
+                self.market_data_service.first_timestamp()
+            )
+
+            available_end = (
+                self.market_data_service.last_timestamp()
+            )
+
             raise ValueError(
-                f"No market candles found between "
-                f"{start} and {end}"
+                "\n"
+                "No market candles found.\n"
+                f"Requested : {start} -> {end}\n"
+                f"Available : {available_start} -> {available_end}"
             )
 
         open_price = float(

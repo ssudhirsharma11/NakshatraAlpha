@@ -4,8 +4,8 @@ Market Data Service
 Loads locally stored historical market data and provides
 convenient access methods for research modules.
 
-The service intentionally does NOT communicate with Kite.
-It only works with downloaded historical CSV data.
+The service never communicates with Kite.
+It only works with the locally downloaded Parquet dataset.
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ from functools import cached_property
 
 import pandas as pd
 
-from src.config.research_config import MARKET_DATA_FILE
+from src.config.market_config import PARQUET_FILE
 
 
 class MarketDataService:
@@ -24,7 +24,7 @@ class MarketDataService:
     """
 
     REQUIRED_COLUMNS = (
-        "date",
+        "timestamp",
         "open",
         "high",
         "low",
@@ -35,40 +35,60 @@ class MarketDataService:
     @cached_property
     def dataframe(self) -> pd.DataFrame:
         """
-        Loads the historical market data.
+        Loads the historical market dataset.
 
         The dataframe is cached after the first read.
         """
 
-        if not MARKET_DATA_FILE.exists():
+        if not PARQUET_FILE.exists():
+
             raise FileNotFoundError(
-                f"Market data file not found:\n{MARKET_DATA_FILE}"
+                f"Market data file not found:\n{PARQUET_FILE}"
             )
 
-        df = pd.read_csv(
-            MARKET_DATA_FILE,
-            parse_dates=["date"],
+        df = pd.read_parquet(
+            PARQUET_FILE,
         )
 
         missing = [
+
             column
+
             for column in self.REQUIRED_COLUMNS
+
             if column not in df.columns
+
         ]
 
         if missing:
+
             raise ValueError(
                 f"Missing required columns: {missing}"
             )
 
-        df = df.sort_values("date").reset_index(drop=True)
+        df["timestamp"] = pd.to_datetime(
+            df["timestamp"]
+        )
+
+        df.sort_values(
+            "timestamp",
+            inplace=True,
+        )
+
+        df.reset_index(
+            drop=True,
+            inplace=True,
+        )
 
         return df
 
-    def get_all_data(self) -> pd.DataFrame:
-        """
-        Returns the complete historical dataset.
-        """
+    # =====================================================
+    # DATA ACCESS
+    # =====================================================
+
+    def get_all_data(
+        self,
+    ) -> pd.DataFrame:
 
         return self.dataframe.copy()
 
@@ -76,14 +96,12 @@ class MarketDataService:
         self,
         trading_date: date,
     ) -> pd.DataFrame:
-        """
-        Returns all candles for one trading day.
-        """
 
         df = self.dataframe
 
         mask = (
-            df["date"].dt.date == trading_date
+            df["timestamp"].dt.date
+            == trading_date
         )
 
         return (
@@ -97,20 +115,13 @@ class MarketDataService:
         start: datetime,
         end: datetime,
     ) -> pd.DataFrame:
-        """
-        Returns candles whose timestamps fall within
-        the supplied interval.
-
-        Start is inclusive.
-        End is exclusive.
-        """
 
         df = self.dataframe
 
         mask = (
-            (df["date"] >= start)
+            (df["timestamp"] >= start)
             &
-            (df["date"] < end)
+            (df["timestamp"] < end)
         )
 
         return (
@@ -119,27 +130,62 @@ class MarketDataService:
             .reset_index(drop=True)
         )
 
-    def trading_days(self) -> list[date]:
-        """
-        Returns all unique trading dates.
-        """
+    # =====================================================
+    # INFORMATION
+    # =====================================================
+
+    def trading_days(
+        self,
+    ) -> list[date]:
 
         return sorted(
-            self.dataframe["date"]
+
+            self.dataframe[
+                "timestamp"
+            ]
             .dt.date
             .unique()
             .tolist()
+
         )
 
     def has_data(
         self,
         trading_date: date,
     ) -> bool:
-        """
-        Returns True if market data exists for
-        the supplied trading day.
-        """
 
         return not self.get_trading_day(
             trading_date
         ).empty
+
+    def first_timestamp(
+        self,
+    ) -> datetime:
+
+        return self.dataframe.iloc[0][
+            "timestamp"
+        ]
+
+    def last_timestamp(
+        self,
+    ) -> datetime:
+
+        return self.dataframe.iloc[-1][
+            "timestamp"
+        ]
+
+    def total_candles(
+        self,
+    ) -> int:
+
+        return len(
+            self.dataframe
+        )
+
+    def total_trading_days(
+        self,
+    ) -> int:
+
+        return len(
+            self.trading_days()
+        )

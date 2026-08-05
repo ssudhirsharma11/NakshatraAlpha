@@ -1,53 +1,67 @@
-from __future__ import annotations
+"""
+Research Data Loader
 
-from pathlib import Path
+Provides a simple interface for loading historical
+market data used by the research engine.
+"""
+
+from __future__ import annotations
 
 import pandas as pd
 
-
-REQUIRED_COLUMNS = {
-    "date",
-    "open",
-    "high",
-    "low",
-    "close",
-    "volume",
-}
+from src.services.market_data_service import (
+    MarketDataService,
+)
 
 
 class DataLoader:
-    """Loads historical OHLC data."""
+    """
+    Thin wrapper around MarketDataService.
 
-    @staticmethod
-    def load(path: str | Path) -> pd.DataFrame:
+    Research modules should use this class instead of
+    reading files directly.
+    """
 
-        path = Path(path)
+    def __init__(self):
 
-        if not path.exists():
-            raise FileNotFoundError(path)
+        self.market_data = MarketDataService()
 
-        if path.suffix.lower() == ".csv":
-            df = pd.read_csv(path)
+    def load(self) -> pd.DataFrame:
+        """
+        Returns the complete historical dataset.
+        """
 
-        elif path.suffix.lower() == ".parquet":
-            df = pd.read_parquet(path)
+        return self.market_data.get_all_data()
 
-        else:
-            raise ValueError(
-                f"Unsupported file type: {path.suffix}"
-            )
+    def trading_days(self):
 
-        missing = REQUIRED_COLUMNS - set(df.columns)
+        return self.market_data.trading_days()
 
-        if missing:
-            raise ValueError(
-                f"Missing required columns: {sorted(missing)}"
-            )
+    def trading_day(
+        self,
+        trading_date,
+    ) -> pd.DataFrame:
 
-        df["date"] = pd.to_datetime(df["date"])
+        return self.market_data.get_trading_day(
+            trading_date
+        )
 
-        df = df.sort_values("date")
+    def between(
+        self,
+        start,
+        end,
+    ) -> pd.DataFrame:
 
-        df = df.reset_index(drop=True)
+        return self.market_data.get_between(
+            start,
+            end,
+        )
 
-        return df
+    def has_data(
+        self,
+        trading_date,
+    ) -> bool:
+
+        return self.market_data.has_data(
+            trading_date
+        )
