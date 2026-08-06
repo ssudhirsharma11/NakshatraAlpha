@@ -18,12 +18,21 @@ class KiteProvider(BaseMarketProvider):
     INDEX_ALIASES = {
         "NIFTY": "NIFTY 50",
         "BANKNIFTY": "NIFTY BANK",
-        "FINNIFTY": "NIFTY FINANCIAL SERVICES",
-        "MIDCPNIFTY": "NIFTY MIDCAP SELECT",
+        "FINNIFTY": "NIFTY FIN SERVICE",
+        "MIDCPNIFTY": "NIFTY MID SELECT",
     }
 
     def __init__(self):
+
         self.kite: KiteConnect = KiteService().get_client()
+
+        print("\nLoading instrument master...")
+
+        self._instruments = self.kite.instruments()
+
+        print(
+            f"Loaded {len(self._instruments):,} instruments."
+        )
 
     def download(
         self,
@@ -38,7 +47,9 @@ class KiteProvider(BaseMarketProvider):
         instrument = self._find_instrument(symbol)
 
         if instrument is None:
-            raise ValueError(f"Instrument '{symbol}' not found.")
+            raise ValueError(
+                f"Instrument '{symbol}' not found."
+            )
 
         candles = self.kite.historical_data(
             instrument_token=instrument["instrument_token"],
@@ -66,27 +77,42 @@ class KiteProvider(BaseMarketProvider):
 
         return dataset
 
-    def _find_instrument(self, symbol: str):
+    def _find_instrument(
+        self,
+        symbol: str,
+    ):
 
-        search_symbol = self.INDEX_ALIASES.get(symbol.upper(), symbol).upper()
+        search_symbol = (
+            self.INDEX_ALIASES
+            .get(symbol.upper(), symbol)
+            .upper()
+        )
 
-        print(f"\nSearching for: {search_symbol}")
+        print(f"\nSearching : {search_symbol}")
 
-        instruments = self.kite.instruments()
+        for instrument in self._instruments:
 
-        for instrument in instruments:
+            if instrument["exchange"] != "NSE":
+                continue
 
             if (
-                instrument["exchange"] == "NSE"
-                and instrument["tradingsymbol"].upper() == search_symbol
+                instrument["tradingsymbol"].upper()
+                == search_symbol
             ):
-                print(f"Found instrument: {instrument['tradingsymbol']}")
+
+                print(
+                    f"Found : "
+                    f"{instrument['tradingsymbol']}"
+                )
+
                 return instrument
 
         return None
 
     @staticmethod
-    def _map_interval(timeframe: Timeframe) -> str:
+    def _map_interval(
+        timeframe: Timeframe,
+    ) -> str:
 
         mapping = {
             Timeframe.MINUTE_1: "minute",

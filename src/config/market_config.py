@@ -20,7 +20,7 @@ from src.market.timeframe import Timeframe
 # Instrument
 # ==========================================================
 
-DEFAULT_SYMBOL = "NIFTY"
+DEFAULT_SYMBOL = "NIFTY 50"
 
 # Future expansion
 #
@@ -44,11 +44,15 @@ DEFAULT_TIMEFRAME = Timeframe.MINUTE_5
 # Change only if we decide to rebuild history further back.
 
 HISTORY_START_DATE = date(
-    2021,
-    7,
-    24,
+    2000,
+    1,
+    1,
 )
-
+INTRADAY_HISTORY_START = date(
+    2015,
+    1,
+    1,
+)
 # ==========================================================
 # Storage
 # ==========================================================
@@ -62,16 +66,73 @@ MARKET_DATA_DIR.mkdir(
     exist_ok=True,
 )
 
-PARQUET_FILE = (
-    MARKET_DATA_DIR /
-    "nifty_5min.parquet"
-)
 
-CSV_FILE = (
-    MARKET_DATA_DIR /
-    "nifty_5min.csv"
-)
+def get_timeframe_name(
+    timeframe: Timeframe,
+) -> str:
+    """
+    Returns a filename-friendly timeframe.
+    """
 
+    mapping = {
+
+        Timeframe.MINUTE_1: "1minute",
+
+        Timeframe.MINUTE_5: "5minute",
+
+        Timeframe.MINUTE_15: "15minute",
+
+        Timeframe.MINUTE_30: "30minute",
+
+        Timeframe.HOUR_1: "60minute",
+
+        Timeframe.DAILY: "daily",
+
+        Timeframe.WEEKLY: "weekly",
+
+    }
+
+    return mapping[timeframe]
+
+
+def get_parquet_file(
+    symbol: str,
+    timeframe: Timeframe,
+) -> Path:
+    """
+    Returns parquet filename for any instrument.
+    """
+
+    symbol = (
+        symbol
+        .lower()
+        .replace(" ", "_")
+    )
+
+    return (
+        MARKET_DATA_DIR /
+        f"{symbol}_{get_timeframe_name(timeframe)}.parquet"
+    )
+
+
+def get_csv_file(
+    symbol: str,
+    timeframe: Timeframe,
+) -> Path:
+    """
+    Returns csv filename for any instrument.
+    """
+
+    symbol = (
+        symbol
+        .lower()
+        .replace(" ", "_")
+    )
+
+    return (
+        MARKET_DATA_DIR /
+        f"{symbol}_{get_timeframe_name(timeframe)}.csv"
+    )
 # ==========================================================
 # Download Behaviour
 # ==========================================================

@@ -2,12 +2,6 @@
 Market History Downloader
 
 Entry point for downloading historical market data.
-
-Supported modes
-
-- FULL
-- UPDATE
-- RANGE
 """
 
 from __future__ import annotations
@@ -15,17 +9,18 @@ from __future__ import annotations
 from datetime import date
 
 from src.config.market_config import (
-    CSV_FILE,
     DEFAULT_SYMBOL,
     DEFAULT_TIMEFRAME,
     DOWNLOAD_BATCH_DAYS,
     EXPORT_CSV,
-    HISTORY_START_DATE,
-    PARQUET_FILE,
 )
 from src.market.history_download_manager import (
     HistoryDownloadManager,
 )
+from src.market.market_repository import (
+    MarketRepository,
+)
+from src.market.timeframe import Timeframe
 
 
 # ==========================================================
@@ -43,16 +38,10 @@ SYMBOL = DEFAULT_SYMBOL
 TIMEFRAME = DEFAULT_TIMEFRAME
 
 # ----------------------------------------------------------
-# Full Download
+# History Range
 # ----------------------------------------------------------
-
-FULL_START_DATE = HISTORY_START_DATE
 
 FULL_END_DATE = date.today()
-
-# ----------------------------------------------------------
-# Range Download
-# ----------------------------------------------------------
 
 RANGE_START_DATE = date(
     2026,
@@ -81,14 +70,30 @@ def main() -> None:
     print(f"Instrument : {SYMBOL}")
     print(f"Timeframe  : {TIMEFRAME.name}")
 
+    repo = MarketRepository()
+
     manager = HistoryDownloadManager(
         symbol=SYMBOL,
         timeframe=TIMEFRAME,
         batch_days=DOWNLOAD_BATCH_DAYS,
     )
 
-    csv_output = (
-        CSV_FILE
+    start_date = (
+        date(2000, 1, 1)
+        if TIMEFRAME == Timeframe.DAILY
+        else date(2015, 1, 1)
+    )
+
+    parquet_file = repo.parquet_file(
+        SYMBOL,
+        TIMEFRAME,
+    )
+
+    csv_file = (
+        repo.csv_file(
+            SYMBOL,
+            TIMEFRAME,
+        )
         if EXPORT_CSV
         else None
     )
@@ -96,17 +101,17 @@ def main() -> None:
     if DOWNLOAD_MODE == "FULL":
 
         manager.download_full(
-            start=FULL_START_DATE,
+            start=start_date,
             end=FULL_END_DATE,
-            parquet_file=PARQUET_FILE,
-            csv_file=csv_output,
+            parquet_file=parquet_file,
+            csv_file=csv_file,
         )
 
     elif DOWNLOAD_MODE == "UPDATE":
 
         manager.update(
-            parquet_file=PARQUET_FILE,
-            csv_file=csv_output,
+            parquet_file=parquet_file,
+            csv_file=csv_file,
         )
 
     elif DOWNLOAD_MODE == "RANGE":
@@ -114,8 +119,8 @@ def main() -> None:
         manager.download_full(
             start=RANGE_START_DATE,
             end=RANGE_END_DATE,
-            parquet_file=PARQUET_FILE,
-            csv_file=csv_output,
+            parquet_file=parquet_file,
+            csv_file=csv_file,
         )
 
     else:
